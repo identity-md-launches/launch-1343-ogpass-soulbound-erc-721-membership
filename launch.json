@@ -1,0 +1,15 @@
+{
+  "kind": "evm_contracts",
+  "contracts": [
+    {
+      "contract": "OGPass",
+      "constructorArgs": [
+        "0xce7eb1ad9e2e1c784ea05f7ea4a0fe625923d10a",
+        "0xb9c8ed1655d96a99d756f50819afd0c008b1097497edba9ee4fdb1b7ce2dc6c8",
+        "49",
+        "$owner"
+      ]
+    }
+  ],
+  "notes": "OGPass is a soulbound ERC-721 membership pass (name \"OG Pass\", symbol \"OGPASS\") on Ethereum mainnet; no ERC-20, pool or proxy is deployed. Constructor (og, founderRoot, founderCount, owner): og is the existing OG ERC-20 at 0xce7eb1ad9e2e1c784ea05f7ea4a0fe625923d10a (18 decimals, never called in the constructor); founderRoot is the OpenZeppelin-standard Merkle root of the 49 founder addresses; founderCount is 49; owner is $owner, which may only setBaseURI and pause/unpause new buys. claimDeadline is immutable at deploy time + 30 days. Max 1,000 passes outstanding (49 founder + up to 951 public), one pass per wallet, all transfers and approvals revert. Public curve P(n) = 1,000,000e18 + 10,000e18 * (n - 1) OG; buy pulls exactly P(publicSupply + 1) via transferFrom, sell pays 92.5% of P(publicSupply) and burns 7.5% to 0x000000000000000000000000000000000000dEaD. Founder passes are off-curve; sellFounder pays a fixed 100,000 OG from a separately funded founder reserve, and burnUnclaimedFounderReserve sends the unneeded reserve to dEaD after the deadline. No owner withdrawal, price, root or deadline changes."
+}

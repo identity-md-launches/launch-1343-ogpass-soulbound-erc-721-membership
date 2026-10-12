@@ -1,0 +1,358 @@
+{
+  "browser": "Chromium 154.0.8037.0",
+  "automaticRedirect": [
+    {
+      "javaScriptEnabled": false,
+      "destination": "https://og-club-members-only-priced-by-t.sites.imd.fun/",
+      "requests": [
+        {
+          "url": "http://127.0.0.1:35359/preview/",
+          "type": "document",
+          "method": "GET"
+        },
+        {
+          "url": "https://og-club-members-only-priced-by-t.sites.imd.fun/",
+          "type": "document",
+          "method": "GET"
+        }
+      ]
+    },
+    {
+      "javaScriptEnabled": true,
+      "destination": "https://og-club-members-only-priced-by-t.sites.imd.fun/",
+      "requests": [
+        {
+          "url": "http://127.0.0.1:35359/preview/",
+          "type": "document",
+          "method": "GET"
+        },
+        {
+          "url": "https://og-club-members-only-priced-by-t.sites.imd.fun/",
+          "type": "document",
+          "method": "GET"
+        }
+      ]
+    }
+  ],
+  "viewports": [
+    {
+      "width": 320,
+      "height": 568,
+      "layout": {
+        "width": 320,
+        "height": 568,
+        "scrollWidth": 320,
+        "heading": {
+          "x": 24,
+          "y": 202.203125,
+          "width": 272,
+          "height": 89.59375,
+          "top": 202.203125,
+          "right": 296,
+          "bottom": 291.796875,
+          "left": 24
+        },
+        "action": {
+          "x": 79.5625,
+          "y": 315.796875,
+          "width": 160.859375,
+          "height": 50,
+          "top": 315.796875,
+          "right": 240.421875,
+          "bottom": 365.796875,
+          "left": 79.5625
+        },
+        "colors": {
+          "background": "rgb(9, 11, 16)",
+          "heading": "rgb(242, 240, 233)",
+          "action": "rgb(35, 26, 8)",
+          "fill": "rgb(255, 209, 102)",
+          "outline": "rgb(35, 26, 8)"
+        },
+        "typography": {
+          "heading": "32px",
+          "action": "16px",
+          "headingWeight": "600",
+          "actionWeight": "600"
+        },
+        "motion": {
+          "animation": "none",
+          "transition": "0s"
+        }
+      },
+      "ratios": {
+        "heading": 17.26,
+        "action": 11.91
+      },
+      "axeViolations": [],
+      "screenshot": "screenshots/redirect-320.png"
+    },
+    {
+      "width": 390,
+      "height": 844,
+      "layout": {
+        "width": 390,
+        "height": 844,
+        "scrollWidth": 390,
+        "heading": {
+          "x": 24,
+          "y": 362.59375,
+          "width": 342,
+          "height": 44.796875,
+          "top": 362.59375,
+          "right": 366,
+          "bottom": 407.390625,
+          "left": 24
+        },
+        "action": {
+          "x": 114.5625,
+          "y": 431.390625,
+          "width": 160.859375,
+          "height": 50,
+          "top": 431.390625,
+          "right": 275.421875,
+          "bottom": 481.390625,
+          "left": 114.5625
+        },
+        "colors": {
+          "background": "rgb(9, 11, 16)",
+          "heading": "rgb(242, 240, 233)",
+          "action": "rgb(35, 26, 8)",
+          "fill": "rgb(255, 209, 102)",
+          "outline": "rgb(35, 26, 8)"
+        },
+        "typography": {
+          "heading": "32px",
+          "action": "16px",
+          "headingWeight": "600",
+          "actionWeight": "600"
+        },
+        "motion": {
+          "animation": "none",
+          "transition": "0s"
+        }
+      },
+      "ratios": {
+        "heading": 17.26,
+        "action": 11.91
+      },
+      "axeViolations": [],
+      "screenshot": "screenshots/redirect-390.png"
+    },
+    {
+      "width": 768,
+      "height": 1024,
+      "layout": {
+        "width": 768,
+        "height": 1024,
+        "scrollWidth": 768,
+        "heading": {
+          "x": 128,
+          "y": 452.59375,
+          "width": 512,
+          "height": 44.796875,
+          "top": 452.59375,
+          "right": 640,
+          "bottom": 497.390625,
+          "left": 128
+        },
+        "action": {
+          "x": 303.5625,
+          "y": 521.390625,
+          "width": 160.859375,
+          "height": 50,
+          "top": 521.390625,
+          "right": 464.421875,
+          "bottom": 571.390625,
+          "left": 303.5625
+        },
+        "colors": {
+          "background": "rgb(9, 11, 16)",
+          "heading": "rgb(242, 240, 233)",
+          "action": "rgb(35, 26, 8)",
+          "fill": "rgb(255, 209, 102)",
+          "outline": "rgb(35, 26, 8)"
+        },
+        "typography": {
+          "heading": "32px",
+          "action": "16px",
+          "headingWeight": "600",
+          "actionWeight": "600"
+        },
+        "motion": {
+          "animation": "none",
+          "transition": "0s"
+        }
+      },
+      "ratios": {
+        "heading": 17.26,
+        "action": 11.91
+      },
+      "axeViolations": [],
+      "screenshot": "screenshots/redirect-768.png"
+    },
+    {
+      "width": 1440,
+      "height": 900,
+      "layout": {
+        "width": 1440,
+        "height": 900,
+        "scrollWidth": 1440,
+        "heading": {
+          "x": 464,
+          "y": 390.59375,
+          "width": 512,
+          "height": 44.796875,
+          "top": 390.59375,
+          "right": 976,
+          "bottom": 435.390625,
+          "left": 464
+        },
+        "action": {
+          "x": 639.5625,
+          "y": 459.390625,
+          "width": 160.859375,
+          "height": 50,
+          "top": 459.390625,
+          "right": 800.421875,
+          "bottom": 509.390625,
+          "left": 639.5625
+        },
+        "colors": {
+          "background": "rgb(9, 11, 16)",
+          "heading": "rgb(242, 240, 233)",
+          "action": "rgb(35, 26, 8)",
+          "fill": "rgb(255, 209, 102)",
+          "outline": "rgb(35, 26, 8)"
+        },
+        "typography": {
+          "heading": "32px",
+          "action": "16px",
+          "headingWeight": "600",
+          "actionWeight": "600"
+        },
+        "motion": {
+          "animation": "none",
+          "transition": "0s"
+        }
+      },
+      "ratios": {
+        "heading": 17.26,
+        "action": 11.91
+      },
+      "axeViolations": [],
+      "screenshot": "screenshots/redirect-1440.png"
+    }
+  ],
+  "navigation": [
+    {
+      "action": "Tab then Enter",
+      "destination": "https://og-club-members-only-priced-by-t.sites.imd.fun/"
+    },
+    {
+      "action": "Pointer click",
+      "destination": "https://og-club-members-only-priced-by-t.sites.imd.fun/"
+    }
+  ],
+  "limitations": [
+    "The destination is intercepted locally to test the exact navigation without loading the new site.",
+    "Fallback layout and manual-link tests remove only the refresh meta tag from the served response so the page can remain visible.",
+    "No native screen-reader, physical-device, native browser zoom, Safari/Firefox or social-crawler session was run."
+  ],
+  "focus": {
+    "visible": true,
+    "width": "2px",
+    "offset": "4px",
+    "color": "rgb(255, 228, 164)",
+    "contrast": 15.83
+  },
+  "hoverContrast": 13.07,
+  "enlargedText": {
+    "width": 390,
+    "height": 844,
+    "scrollWidth": 390,
+    "heading": {
+      "x": 48,
+      "y": 190.609375,
+      "width": 294,
+      "height": 268.78125,
+      "top": 190.609375,
+      "right": 342,
+      "bottom": 459.390625,
+      "left": 48
+    },
+    "action": {
+      "x": 48,
+      "y": 507.390625,
+      "width": 294,
+      "height": 146,
+      "top": 507.390625,
+      "right": 342,
+      "bottom": 653.390625,
+      "left": 48
+    },
+    "colors": {
+      "background": "rgb(9, 11, 16)",
+      "heading": "rgb(242, 240, 233)",
+      "action": "rgb(35, 26, 8)",
+      "fill": "rgb(255, 209, 102)",
+      "outline": "rgb(35, 26, 8)"
+    },
+    "typography": {
+      "heading": "64px",
+      "action": "32px",
+      "headingWeight": "600",
+      "actionWeight": "600"
+    },
+    "motion": {
+      "animation": "none",
+      "transition": "0s"
+    }
+  },
+  "forcedColors": {
+    "width": 390,
+    "height": 844,
+    "scrollWidth": 390,
+    "heading": {
+      "x": 24,
+      "y": 362.59375,
+      "width": 342,
+      "height": 44.796875,
+      "top": 362.59375,
+      "right": 366,
+      "bottom": 407.390625,
+      "left": 24
+    },
+    "action": {
+      "x": 114.5625,
+      "y": 431.390625,
+      "width": 160.859375,
+      "height": 50,
+      "top": 431.390625,
+      "right": 275.421875,
+      "bottom": 481.390625,
+      "left": 114.5625
+    },
+    "colors": {
+      "background": "rgb(255, 255, 255)",
+      "heading": "rgb(0, 0, 0)",
+      "action": "rgb(0, 0, 159)",
+      "fill": "rgb(255, 255, 255)",
+      "outline": "rgba(5, 0, 73, 0.8)"
+    },
+    "typography": {
+      "heading": "32px",
+      "action": "16px",
+      "headingWeight": "600",
+      "actionWeight": "600"
+    },
+    "motion": {
+      "animation": "none",
+      "transition": "0s"
+    }
+  },
+  "accessibilityTree": "- main:\n  - heading \"OG Club has moved\" [level=1]\n  - link \"Go to OG Club\":\n    - /url: https://og-club-members-only-priced-by-t.sites.imd.fun/",
+  "consoleErrors": [],
+  "failedRequests": [],
+  "runtimeScriptOrRpcRequests": 0
+}

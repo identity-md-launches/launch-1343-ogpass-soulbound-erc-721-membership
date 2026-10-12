@@ -1,311 +1,162 @@
-import fs from "node:fs";
-import http from "node:http";
-import path from "node:path";
-import assert from "node:assert/strict";
-import { chromium } from "playwright";
-import AxeBuilder from "@axe-core/playwright";
-const root = path.resolve("../dist");
+import fs from 'node:fs';
+import http from 'node:http';
+import path from 'node:path';
+import assert from 'node:assert/strict';
+import { chromium } from 'playwright';
+import AxeBuilder from '@axe-core/playwright';
+
+const root = path.resolve(import.meta.dirname, '../../dist');
+const docs = path.resolve(import.meta.dirname, '../../docs');
+const destination = 'https://og-club-members-only-priced-by-t.sites.imd.fun/';
+const refresh = `<meta http-equiv="refresh" content="0; url=${destination}">`;
+const html = fs.readFileSync(path.join(root, 'index.html'), 'utf8');
+assert.equal(html.split(refresh).length, 2);
+fs.mkdirSync(path.join(docs, 'screenshots'), { recursive: true });
+fs.mkdirSync(path.join(docs, 'checks'), { recursive: true });
 const server = http.createServer((req, res) => {
-  const pathname = decodeURIComponent(
-    new URL(req.url, "http://localhost").pathname,
-  );
-  if (!pathname.startsWith("/preview/")) {
-    res.writeHead(404);
-    return res.end("Not found");
+  const url = new URL(req.url, 'http://localhost');
+  const name = url.pathname.replace(/^\/preview\//, '') || 'index.html';
+  if (!url.pathname.startsWith('/preview/') || !['index.html', 'favicon.svg', 'social-card.png'].includes(name)) {
+    res.writeHead(404); return res.end();
   }
-  const file = path.resolve(
-    root,
-    pathname.slice("/preview/".length) || "index.html",
-  );
-  if (!file.startsWith(root + path.sep)) {
-    res.writeHead(403);
-    return res.end();
-  }
-  try {
-    const bytes = fs.readFileSync(file);
-    res.writeHead(200, {
-      "Content-Type":
-        {
-          ".html": "text/html",
-          ".js": "text/javascript",
-          ".css": "text/css",
-          ".json": "application/json",
-          ".svg": "image/svg+xml",
-          ".png": "image/png",
-        }[path.extname(file)] || "application/octet-stream",
-    });
-    res.end(bytes);
-  } catch {
-    res.writeHead(404);
-    res.end("Not found");
-  }
+  res.writeHead(200, { 'content-type': { '.html': 'text/html', '.svg': 'image/svg+xml', '.png': 'image/png' }[path.extname(name)] });
+  res.end(fs.readFileSync(path.join(root, name)));
 });
-await new Promise((resolve) => server.listen(0, "127.0.0.1", resolve));
+await new Promise(resolve => server.listen(0, '127.0.0.1', resolve));
 const base = `http://127.0.0.1:${server.address().port}/preview/`;
-const browser = await chromium.launch({
-  executablePath:
-    process.env.OGCLUB_CHROMIUM ||
-    "/opt/imd-tools/ms-playwright/chromium_headless_shell-1246/chrome-headless-shell-linux64/chrome-headless-shell",
-  headless: true,
-  args: ["--no-sandbox"],
-});
-const context = await browser.newContext();
-const page = await context.newPage();
-const errors = [];
-const failures = [];
-page.on("pageerror", (e) => errors.push(e.message));
-page.on("requestfailed", (r) =>
-  failures.push({ url: r.url(), error: r.failure() }),
-);
+let browser;
+const results = { browser: '', automaticRedirect: [], viewports: [], navigation: [], limitations: [
+  'The destination is intercepted locally to test the exact navigation without loading the new site.',
+  'Fallback layout and manual-link tests remove only the refresh meta tag from the served response so the page can remain visible.',
+  'No native screen-reader, physical-device, native browser zoom, Safari/Firefox or social-crawler session was run.',
+] };
+const luminance = color => {
+  const c = color.match(/[\d.]+/g).slice(0, 3).map(n => Number(n) / 255).map(n => n <= 0.04045 ? n / 12.92 : ((n + 0.055) / 1.055) ** 2.4);
+  return c[0] * 0.2126 + c[1] * 0.7152 + c[2] * 0.0722;
+};
+const contrast = (a, b) => {
+  const [lo, hi] = [luminance(a), luminance(b)].sort((x, y) => x - y);
+  return Number(((hi + 0.05) / (lo + 0.05)).toFixed(2));
+};
 try {
-  await page.route(
-    /https:\/\/(mainnet.gateway.tenderly.co|rpc.mevblocker.io|eth.drpc.org)\/?/,
-    async (route) => {
-      try {
-        const response = await fetch(process.env.OGCLUB_RPC || "http://127.0.0.1:42601/rpc/1", {
-          method: "POST",
-          headers: { "content-type": "application/json" },
-          body: route.request().postData(),
-        });
-        await route.fulfill({
-          status: response.status,
-          contentType: "application/json",
-          body: await response.text(),
-        });
-      } catch (e) {
-        await route.abort();
-      }
-    },
-  );
-  await page.goto(base);
-  await page
-    .getByText("State at block", { exact: false })
-    .waitFor({ timeout: 30000 });
-  await page
-    .getByText("Explore pass", { exact: false })
-    .waitFor({ timeout: 30000 });
-  fs.mkdirSync("../docs/screenshots", { recursive: true });
-  const results = [];
-  for (const [width, height] of [
-    [390, 844],
-    [375, 812],
-    [320, 812],
-    [768, 1024],
-    [1440, 1000],
-  ]) {
-    await page.setViewportSize({ width, height });
-    await page.evaluate(() => window.scrollTo(0, 0));
-    const layout = await page.evaluate(() => ({
-      width: innerWidth,
-      scrollWidth: document.documentElement.scrollWidth,
-      heading: document.querySelector("h1")?.getBoundingClientRect().toJSON(),
-      primary: document
-        .querySelector(".pass-card .primary")
-        ?.getBoundingClientRect()
-        .toJSON(),
-      design: {
-        headline: document.querySelector("h1").textContent,
-        description: document.querySelector(".hero-description").textContent,
-        heroWeight: getComputedStyle(document.querySelector("h1")).fontWeight,
-        brandWeight: getComputedStyle(document.querySelector(".brand")).fontWeight,
-        warningWeight: getComputedStyle(document.querySelector(".risk-note strong")).fontWeight,
-        passShadow: getComputedStyle(document.querySelector(".pass-card")).boxShadow,
-        passBorder: getComputedStyle(document.querySelector(".pass-card")).borderTopWidth,
-        unitTracking: [...document.querySelectorAll(".reserve-grid .metric dd small")].map((el) => getComputedStyle(el).letterSpacing),
-        weights: [...new Set([...document.querySelectorAll("body *")]
-          .filter((el) => el.getClientRects().length && [...el.childNodes].some((n) => n.nodeType === 3 && n.textContent.trim()))
-          .map((el) => getComputedStyle(el).fontWeight))].sort(),
-      },
-    }));
-    assert.equal(layout.design.headline, "Buy your OG Club pass.");
-    assert.equal(layout.design.description, "A non-transferable Ethereum membership for community, content and tools.");
-    assert.deepEqual(layout.design.weights, ["400", "500", "600"]);
-    assert.equal(layout.design.heroWeight, "600");
-    assert.equal(layout.design.brandWeight, "600");
-    assert.equal(layout.design.warningWeight, "600");
-    assert.equal(layout.design.passShadow, "none");
-    assert.equal(layout.design.passBorder, "1px");
-    assert.equal(layout.design.unitTracking.length, 3);
-    assert.ok(layout.design.unitTracking.every((value) => value === "0px" || value === "normal"));
-    assert.ok(
-      layout.scrollWidth <= width,
-      `Overflow at ${width}: ${layout.scrollWidth}`,
-    );
-    if (width === 390 || width === 375)
-      assert.ok(
-        layout.primary.bottom <= height,
-        `Primary action below first screen at ${width}`,
-      );
-    const axe = await new AxeBuilder({ page })
-      .withTags(["wcag2a", "wcag2aa", "wcag21aa"])
-      .analyze();
-    results.push({
-      width,
-      height,
-      layout,
-      violations: axe.violations.map((v) => ({
-        id: v.id,
-        impact: v.impact,
-        nodes: v.nodes.map((n) => ({
-          target: n.target,
-          summary: n.failureSummary,
-        })),
-      })),
+  browser = await chromium.launch({
+    headless: true,
+    executablePath: process.env.OGCLUB_CHROMIUM || '/opt/imd-tools/ms-playwright/chromium_headless_shell-1246/chrome-headless-shell-linux64/chrome-headless-shell',
+  });
+  results.browser = `Chromium ${browser.version()}`;
+  for (const javaScriptEnabled of [false, true]) {
+    const context = await browser.newContext({ javaScriptEnabled });
+    const page = await context.newPage();
+    const requests = [];
+    await context.route('**/*', async route => {
+      const request = route.request();
+      requests.push({ url: request.url(), type: request.resourceType(), method: request.method() });
+      if (request.url() === destination) return route.fulfill({ contentType: 'text/html', body: '<!doctype html><title>Navigation intercepted by test</title>' });
+      assert.ok(request.url().startsWith(base), `Unexpected request: ${request.url()}`);
+      return route.continue();
     });
-    if (width === 390 || width === 1440)
-      await page.screenshot({
-        path: `../docs/screenshots/${width === 390 ? "mobile" : "desktop"}.jpg`,
-        fullPage: true,
-        type: "jpeg",
-        quality: 80,
-      });
+    const navigated = page.waitForURL(destination);
+    await page.goto(base, { waitUntil: 'domcontentloaded' });
+    await navigated;
+    assert.equal(page.url(), destination);
+    assert.ok(requests.every(r => r.method === 'GET' && !['script', 'fetch', 'xhr', 'websocket'].includes(r.type)));
+    results.automaticRedirect.push({ javaScriptEnabled, destination: page.url(), requests });
+    await context.close();
   }
-  await page.setViewportSize({ width: 390, height: 844 });
+
+  const context = await browser.newContext({ viewport: { width: 390, height: 844 } });
+  const page = await context.newPage();
+  const consoleErrors = [];
+  const failedRequests = [];
+  const requests = [];
+  page.on('pageerror', error => consoleErrors.push(error.message));
+  page.on('console', message => { if (message.type() === 'error') consoleErrors.push(message.text()); });
+  page.on('requestfailed', request => failedRequests.push(request.url()));
+  await context.route('**/*', async route => {
+    const request = route.request();
+    requests.push({ url: request.url(), type: request.resourceType(), method: request.method() });
+    if (request.url() === destination) return route.fulfill({ contentType: 'text/html', body: '<!doctype html><title>Navigation intercepted by test</title>' });
+    assert.ok(request.url().startsWith(base), `Unexpected request: ${request.url()}`);
+    if (request.isNavigationRequest()) return route.fulfill({ contentType: 'text/html', body: html.replace(refresh, '') });
+    return route.continue();
+  });
   await page.goto(base);
-  await page.getByText("State at block", { exact: false }).waitFor();
-  await page.keyboard.press("Tab");
-  assert.ok(
-    await page
-      .locator(".skip-link")
-      .evaluate((el) => document.activeElement === el),
-  );
-  await page.keyboard.press("Tab");
-  await page.keyboard.press("Tab");
-  assert.ok(
-    await page
-      .locator(".wallet-button")
-      .evaluate((el) => document.activeElement === el),
-  );
-  await page.keyboard.press("Enter");
-  await page.getByRole("dialog").waitFor();
-  await page.screenshot({
-    path: "../docs/screenshots/keyboard-focus.jpg",
-    type: "jpeg",
-    quality: 80,
-  });
-  for (let i = 0; i < 6; i++) {
-    await page.keyboard.press("Tab");
-    assert.ok(
-      await page
-        .getByRole("dialog")
-        .evaluate((el) => el.contains(document.activeElement)),
-      "Modal traps keyboard focus",
-    );
-  }
-  await page.keyboard.press("Escape");
-  assert.ok(
-    await page
-      .locator(".wallet-button")
-      .evaluate((el) => document.activeElement === el),
-    "Keyboard-opened dialog returns focus",
-  );
-  await page.evaluate(() => window.scrollTo(0, 0));
-  await page.getByRole("button", { name: "Connect wallet to join" }).click();
-  await page.getByRole("dialog").waitFor();
-  assert.ok(await page.getByText("No injected wallet found.").isVisible());
-  await page.keyboard.press("Escape");
-  assert.equal(await page.getByRole("dialog").count(), 0);
-  const focusReturned = await page
-    .getByRole("button", { name: "Connect wallet to join" })
-    .evaluate((el) => document.activeElement === el);
-  assert.ok(focusReturned, "Dialog focus returned to trigger");
-  await page.getByRole("button", { name: "Sell a pass", exact: true }).click();
-  assert.ok(
-    await page
-      .getByRole("button", { name: "Connect wallet to view your pass" })
-      .isVisible(),
-  );
-  await page.getByRole("button", { name: "Buy a pass", exact: true }).click();
-  const range = page.getByRole("slider", { name: "Explore pass" });
-  await range.focus();
-  await page.keyboard.press("End");
-  assert.equal(await range.inputValue(), await range.getAttribute("max"));
-  await page.keyboard.press("Home");
-  assert.equal(await range.inputValue(), "1");
-  await page.emulateMedia({ reducedMotion: "reduce" });
-  assert.equal(
-    await page
-      .locator(".wallet-button")
-      .evaluate((el) => getComputedStyle(el).transitionDuration),
-    "0s",
-  );
-  await page.setViewportSize({ width: 390, height: 844 });
-  await page.evaluate(() => {
-    document.documentElement.style.fontSize = "32px";
-  });
-  const enlarged = await page.evaluate(() => ({
-    width: innerWidth,
-    scrollWidth: document.documentElement.scrollWidth,
-  }));
-  assert.ok(enlarged.scrollWidth <= 390, "200% text enlargement overflow");
-  await page.evaluate(() => (document.documentElement.style.fontSize = ""));
-  const colors = await page.evaluate(() => {
-    const lum = (rgb) => {
-      const a = rgb
-        .match(/[\d.]+/g)
-        .slice(0, 3)
-        .map(Number)
-        .map((n) => {
-          const v = n / 255;
-          return v <= 0.04045 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4;
-        });
-      return a[0] * 0.2126 + a[1] * 0.7152 + a[2] * 0.0722;
+  const measure = () => page.evaluate(() => {
+    const heading = document.querySelector('h1');
+    const action = document.querySelector('a');
+    const hs = getComputedStyle(heading);
+    const as = getComputedStyle(action);
+    return {
+      width: innerWidth, height: innerHeight, scrollWidth: document.documentElement.scrollWidth,
+      heading: heading.getBoundingClientRect().toJSON(), action: action.getBoundingClientRect().toJSON(),
+      colors: { background: getComputedStyle(document.documentElement).backgroundColor, heading: hs.color, action: as.color, fill: as.backgroundColor, outline: as.outlineColor },
+      typography: { heading: hs.fontSize, action: as.fontSize, headingWeight: hs.fontWeight, actionWeight: as.fontWeight },
+      motion: { animation: as.animationName, transition: as.transitionDuration },
     };
-    return [".hero-description", ".button.primary", ".caption", ".panel"].map(
-      (selector) => {
-        const el = document.querySelector(selector);
-        const style = getComputedStyle(el);
-        let bg = style.backgroundColor;
-        let parent = el;
-        while (bg === "rgba(0, 0, 0, 0)" && parent.parentElement) {
-          parent = parent.parentElement;
-          bg = getComputedStyle(parent).backgroundColor;
-        }
-        const a = lum(style.color),
-          b = lum(bg);
-        return {
-          selector,
-          foreground: style.color,
-          background: bg,
-          contrast: (Math.max(a, b) + 0.05) / (Math.min(a, b) + 0.05),
-        };
-      },
-    );
   });
-  await page.setViewportSize({ width: 1200, height: 630 });
-  await page.goto(base + "social-card.png");
-  assert.deepEqual(
-    await page
-      .locator("img")
-      .evaluate((el) => [el.naturalWidth, el.naturalHeight]),
-    [1200, 630],
-  );
-  const report = {
-    checkedAt: new Date().toISOString(),
-    preview: "Production dist served under /preview/",
-    rpc: "Read-only requests relayed to worker RPC. No wallet writes.",
-    results,
-    keyboard:
-      "Tab order, native modal focus trap, Escape and focus return, range keyboard controls; focused dialog screenshot inspected.",
-    focusReturned,
-    enlarged,
-    colors,
-    errors,
-    failures,
-  };
-  fs.writeFileSync(
-    "../artifacts/browser-check.json",
-    JSON.stringify(report, null, 2) + "\n",
-  );
-  console.log(JSON.stringify(report, null, 2));
-  assert.equal(errors.length, 0, "Page JavaScript errors");
-  assert.equal(failures.length, 0, "Failed requests");
-  assert.equal(
-    results.flatMap((r) => r.violations).length,
-    0,
-    "Accessibility violations",
-  );
+  for (const [width, height] of [[320, 568], [390, 844], [768, 1024], [1440, 900]]) {
+    await page.setViewportSize({ width, height });
+    const layout = await measure();
+    assert.ok(layout.scrollWidth <= width, `Overflow at ${width}`);
+    assert.ok(layout.heading.top >= 0 && layout.action.bottom <= height, `Primary content outside first screen at ${width}`);
+    assert.ok(layout.action.width >= 44 && layout.action.height >= 44);
+    assert.deepEqual(layout.motion, { animation: 'none', transition: '0s' });
+    const ratios = { heading: contrast(layout.colors.heading, layout.colors.background), action: contrast(layout.colors.action, layout.colors.fill) };
+    assert.ok(ratios.heading >= 4.5 && ratios.action >= 4.5);
+    const audit = await new AxeBuilder({ page }).withTags(['wcag2a', 'wcag2aa', 'wcag21aa']).analyze();
+    assert.equal(audit.violations.length, 0, JSON.stringify(audit.violations));
+    const screenshot = `screenshots/redirect-${width}.png`;
+    await page.screenshot({ path: path.join(docs, screenshot), fullPage: true });
+    results.viewports.push({ width, height, layout, ratios, axeViolations: [], screenshot });
+  }
+  await page.setViewportSize({ width: 390, height: 844 });
+  const link = page.getByRole('link', { name: 'Go to OG Club', exact: true });
+  await page.keyboard.press('Tab');
+  assert.equal(await link.evaluate(el => el === document.activeElement), true);
+  results.focus = await link.evaluate(el => ({ visible: el.matches(':focus-visible'), width: getComputedStyle(el).outlineWidth, offset: getComputedStyle(el).outlineOffset, color: getComputedStyle(el).outlineColor }));
+  assert.equal(results.focus.visible, true);
+  assert.equal(results.focus.width, '2px');
+  results.focus.contrast = contrast(results.focus.color, (await measure()).colors.background);
+  assert.ok(results.focus.contrast >= 3);
+  await page.screenshot({ path: path.join(docs, 'screenshots/redirect-focus.png') });
+  let navigation = page.waitForURL(destination);
+  await page.keyboard.press('Enter'); await navigation;
+  results.navigation.push({ action: 'Tab then Enter', destination: page.url() });
+  await page.goto(base);
+  await link.hover();
+  const hovered = await measure();
+  results.hoverContrast = contrast(hovered.colors.action, hovered.colors.fill);
+  assert.ok(results.hoverContrast >= 4.5);
+  navigation = page.waitForURL(destination);
+  await link.click(); await navigation;
+  results.navigation.push({ action: 'Pointer click', destination: page.url() });
+  await page.goto(base);
+  await page.evaluate(() => { document.documentElement.style.fontSize = '200%'; });
+  results.enlargedText = await measure();
+  assert.ok(results.enlargedText.scrollWidth <= 390);
+  assert.ok(results.enlargedText.action.bottom <= 844);
+  await page.screenshot({ path: path.join(docs, 'screenshots/redirect-text-200.png'), fullPage: true });
+  await page.evaluate(() => { document.documentElement.style.fontSize = ''; });
+  await page.emulateMedia({ forcedColors: 'active', reducedMotion: 'reduce' });
+  await page.keyboard.press('Tab');
+  results.forcedColors = await measure();
+  assert.equal(await link.evaluate(el => el.matches(':focus-visible')), true);
+  await page.screenshot({ path: path.join(docs, 'screenshots/redirect-forced-colors.png') });
+  await page.emulateMedia({ forcedColors: 'none', reducedMotion: 'no-preference' });
+  results.accessibilityTree = await page.locator('body').ariaSnapshot();
+  for (const asset of ['favicon.svg', 'social-card.png']) {
+    const response = await context.request.get(base + asset);
+    assert.equal(response.status(), 200);
+    assert.ok((await response.body()).equals(fs.readFileSync(path.join(root, asset))));
+  }
+  assert.ok(requests.every(r => r.method === 'GET' && !['script', 'fetch', 'xhr', 'websocket'].includes(r.type)));
+  assert.deepEqual(consoleErrors, []); assert.deepEqual(failedRequests, []);
+  results.consoleErrors = consoleErrors; results.failedRequests = failedRequests;
+  results.runtimeScriptOrRpcRequests = 0;
+  await context.close();
+  fs.writeFileSync(path.join(docs, 'checks/redirect-browser.json'), JSON.stringify(results, null, 2) + '\n');
+  console.log(JSON.stringify({ automaticRedirect: results.automaticRedirect.length, viewports: results.viewports.length, manualNavigations: results.navigation.length, consoleErrors, failedRequests, runtimeScriptOrRpcRequests: 0, report: 'docs/checks/redirect-browser.json' }, null, 2));
 } finally {
-  await browser.close();
-  await new Promise((resolve) => server.close(resolve));
+  await browser?.close();
+  await new Promise(resolve => server.close(resolve));
 }

@@ -1,95 +1,56 @@
-# OG Club design system
+# OG Club redirect design
 
 ## Overview
 
-OG Club is a membership interface for visitors and existing public/founder pass holders. Its dark charcoal surfaces and gold accent extend the OG Swarm map's visual direction. A short product introduction sits beside an actionable membership card on desktop and above it on mobile. Contract facts, risks and the primary action take precedence over decoration.
-
-The source of truth is `web/src/styles.css`, with page composition and components in `web/src/App.tsx`. The implementation is a single fragment-navigated page; there is no page transition, carousel, theme switch or custom icon font. The five-word hero headline, “Buy your OG Club pass.”, names the product and paid action; one supporting sentence explains the membership. There are no tracked uppercase eyebrow headings.
+A single static redirect page for visitors arriving at the old OG Club URL. `web/index.html` is the source of truth for markup, tokens and CSS. It contains one centered heading and one prominent native navigation link. The dark background and warm gold action retain the old site's visual identity. The headline is exactly “OG Club has moved”; the action is “Go to OG Club”. Immediate HTML navigation is the normal state; the visible composition is its fallback.
 
 ## Colors
 
-The implemented semantic tokens use sRGB hex values; reuse these variables rather than introducing a second palette.
+All tokens are defined in `web/index.html:20` and use the existing sRGB hex notation.
 
-| Token | Value | Role |
+| Token | Value | Implemented role |
 | --- | --- | --- |
-| `--bg` | `#090b10` | Page and inset controls |
-| `--surface` | `#12151c` | Panels, dialogs and notices |
-| `--surface-raised` | `#1b1e25` | Selected segmented control, hover and disabled fills |
-| `--text` | `#f2f0e9` | Primary text |
-| `--muted` | `#b2b2b9` | Secondary text and captions |
-| `--gold` | `#ffd166` | Primary action fill, chart, links and club decoration; matches the Swarm map's gold |
-| `--gold-ink` | `#231a08` | Text on gold primary buttons and selection |
-| `--border` | `#363943` | Control/panel structure and chart grid |
-| `--success` | `#9ed8b5` | Ethereum indicator and Buy event label |
-| `--error` | `#ffb4ac` | Errors and consequential sale warnings |
-| `--error-surface` | `#281b1e` | Error notices and sale-button hover |
-| `--focus` | `#ffe4a4` | Two-pixel keyboard outline with four-pixel offset |
+| `--bg` | `#090b10` | Page background |
+| `--text` | `#f2f0e9` | Heading |
+| `--accent` | `#ffd166` | Primary link fill |
+| `--accent-hover` | `#ffdd8d` | Fill on hover-capable pointers |
+| `--accent-ink` | `#231a08` | Primary link label |
+| `--focus` | `#ffe4a4` | Keyboard focus outline |
 
-The pass and founder panels use restrained warm gradients (`#222017` / `#211e16` into `--surface`) and `#635334` borders. The risk notice uses `#171710` with a `#3d3927` border. The gold primary hover is `#ffdd8d`. These are surface-specific values, not additional text tokens. Gold decoration never stands alone as an interaction cue: controls have a shape or underline; statuses have text.
-
-Measured rendered pairs: secondary text on the page 9.34:1; primary-button ink on gold 11.91:1; primary text on a normal panel 16.02:1. Measurements and coverage limits are in `docs/VALIDATION.md`. The product intentionally has only the requested dark theme; forced-colors overrides preserve native system focus colors.
+Measured from computed browser colors: heading/background 17.26:1; action label/fill 11.91:1; label/hover fill 13.07:1; focus/background 15.83:1. The focus outline is separated from the fill by a 4px background gap. In forced-colors mode the browser supplies the palette, the link gets a `LinkText` border, and its outline uses `Highlight`. The only authored theme is dark; forced colors are a system accessibility mode.
 
 ## Typography
 
-Six text-size tokens live at the top of `styles.css`:
-
-| Token | Size at the default root | Use |
-| --- | --- | --- |
-| `--text-sm` | `.875rem` / 14px | UI controls, supporting copy, chart labels and captions |
-| `--text-base` | `1rem` / 16px | Body copy, small-screen introduction |
-| `--text-lg` | `1.25rem` / 20px | Subheadings, desktop introduction and brand |
-| `--text-xl` | `1.5rem` / 24px | Mobile section headings, card headings, dialog headings |
-| `--text-display` | `2.25rem` / 36px | Prices, desktop section headings and narrow hero |
-| `--text-hero` | `3.75rem` / 60px | Wide-screen hero |
-
-The main stack is `Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif`. No Inter file or remote font is requested: Inter is used only if installed, otherwise the platform supplies the system face. The italic word in the hero uses `Georgia, "Times New Roman", serif`. The decorative pass seal uses Georgia/serif. There are no bundled webfonts.
-
-Body line-height is 1.6; captions are 1.5; short headings are 1.15 (hero 1.08). The three weights are 400, 500 and 600. The hero, brand, controls and default `strong`/`b` emphasis use 600; secondary headings use 500/600; regular copy and the gold italic hero emphasis use 400. Explicit local emphasis overrides remain in place. Heading tracking ranges from −.02em to −.055em. Long copy remains regular-weight and readable. Headings balance; prose uses pretty wrapping. Prices, counters, timestamps and table values use tabular figures. `.metric dd small` resets OG unit tracking to `0`, so units do not inherit display-number tracking.
-
-Chart axis labels are HTML using the caption token, so their text does not shrink with the SVG. The diagram's accessible name includes its range, current supply and selected price. Wallet addresses are shortened in dense areas, with the complete connected address in its dialog and event addresses linked to their full explorer pages.
+`system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif`; no font downloads. Two size tokens: `--text-heading: 2rem` (32px with a 16px root) and `--text-body: 1rem` (16px). Both elements request weight 600 from the system font. Heading line-height is 1.4, tracking −0.02em, with balanced wrapping. The action line-height is 1.5 with normal tracking. Text stays selectable and may wrap; there is no truncation, all-caps label, or fixed text-container height. Font appearance may vary by OS.
 
 ## Layout
 
-Spacing follows a four-pixel base with 8/12/16px within groups, 20/24/28/32px panel padding, and 40/48/64/72px between major groups. The header is at most 1280px wide; main content is at most 1200px including its gutters. Both center in the viewport.
+The body uses a centered grid with `min-block-size: 100vh`, enhanced to `100svh`, and `2rem` vertical / `1.5rem` horizontal padding. Content has `inline-size: 100%` and `max-inline-size: 32rem`. The heading's bottom margin is `1.5rem`; the action uses `0.75rem 1.5rem` padding and a `3rem` minimum block size. At the default root it measures about 161×50px.
 
-- Wide layout: 40px page gutters, a `1.2fr 1fr` hero with a 72px gap, a `1.7fr 1fr` chart/supply grid, three reserve metrics and three member tiles. The founder panel uses `1fr 1.45fr` columns. Major sections begin 64px apart.
-- At `68rem`: 24px gutters, smaller hero type and spacing, a simplified brand subtitle and wrapping wallet controls.
-- At `50rem`: header section navigation is hidden (all sections remain in normal document flow); the chart/supply section becomes one column. Member and Telegram content can wrap.
-- At `38rem`: 16px gutters; hero, founder panel, reserve metrics and member tiles stack. Sections use 44px separation. The connected header gets a second row for OG balance and the membership badge. Its main connect/account button stays at the top.
-
-All content remains in document flow; no sticky toolbar obscures small screens. The activity table alone scrolls horizontally inside a named, keyboard-focusable region. The page itself has no horizontal overflow at tested widths of 320, 375, 390, 768 and 1440px, or with 200% text enlargement at 390px. The main connect-to-join button ends at about y=704px at both 390×844 and 375×812. These are measured initial visitor states, not a guarantee about every future translation or wallet label.
+No viewport breakpoints are needed. The main column contracts with its container and the heading wraps naturally at 320px. In measured 390×844 fallback rendering, the one-line heading and action are both on the first screen. Checked 320, 390, 768 and 1440px widths without horizontal overflow. At 390px and 200% root text size, the heading and link wrap and remain visible. Text containers can grow and the document can scroll on shorter screens. See the review for the distinction between text enlargement and unperformed native browser zoom.
 
 ## Elevation & Depth
 
-Ordinary panels are flat with a one-pixel structural border. The pass card uses its gold border and gradient without a drop shadow; its seal has two subtle inset rings. The selected segment uses `0 1px 3px #0006`. Dialogs use `0 24px 80px #0009` with a `#000b` native backdrop. There is no blur, parallax, image background or autoplay.
+A flat page with no panels, shadows, gradients, overlays, or decoration. The action fill establishes its interaction affordance. The border is transparent in the authored theme and becomes visible in forced-colors mode.
 
 ## Shapes
 
-Buttons, small notices and the segmented control use 8px corners; the selected segment uses 6px. Ordinary panels and risk notices use 12px; founder panels and dialogs use 16px. The large pass card uses 20px, reduced to 16px on mobile. Badges use 6px; event labels use 4px. The pass seal and Ethereum status marker are circular.
+The action has a `0.5rem` corner radius and a 1px border. Focus adds a 2px solid outline with 4px offset. The existing OG favicon is retained; the local 1200×630 sharing card uses the same page palette and updated migration copy.
 
 ## Components
 
-| Component / source | Intended use and behavior |
-| --- | --- |
-| `.button`, `.primary`, `.danger`, `.subtle` in `styles.css` | Border-only secondary actions; gold primary purchase/connection; explicit sale warnings; quiet refresh. Main controls have at least 44–46px height. Native disabled state has adjacent explanatory copy. Hover is gated to hover-capable pointers. |
-| `Modal` in `App.tsx` | Native `dialog.showModal()` makes background content inert. Close button, Escape, explicit Tab boundary cycling and browser focus restoration keep the flow keyboard-usable. Long review content scrolls within a viewport-bounded dialog. |
-| `Curve({ prices, supply })` in `App.tsx` | Contract-read prices, SVG line/fill and a dashed current-supply marker. Native range input with a bound label supports pointer/keyboard exploration. HTML endpoints/current-supply text and a live selected-value output supplement the drawing. Empty reads have explanatory copy. |
-| `Metric({ label, value, note })` in `App.tsx` | Definition-list group using a `dt` followed by value/note `dd`s. Supports changing numeric values and truthful unavailable states. |
-| `.pass-card`, `.segment`, `.quote` | Fixed membership identity above the Buy/Sell controls. Quote and call-to-action remain central. Sell mode shows the fixed founder buyback and permanent loss warning for founders; public holders see the net public payout and burn caption. Optional ETH estimates use the displayed amount and appear only with a verified configured pool and a successful read. |
-| `.founder-section`, `.countdown` | Countdown, eligibility, root mismatch, reserve funding and founder exit consequences. Claim actions disappear for ineligible/claimed/member/expired states. The reserve status remains factual. |
-| `External` and `Arrow` in `App.tsx` | Consistent descriptive external links with an arrow and screen-reader new-tab note; decorative arrows are hidden from assistive technology. |
-| `.notice`, `.error`, `.transaction-status` | Persistent errors with recovery, a stable polite live region for progress, and transaction explorer links. Color always accompanies readable text. |
-| `.member-grid`, `.member-locked`, `.telegram-row` | Honest content placeholders, a locked visitor state, and a signature-based invite action. Missing backend becomes coming soon without a signature prompt. A successful invite survives same-account snapshot refreshes; account changes, disconnects and confirmed membership loss clear it. An in-flight response from a previous wallet session is discarded. |
+| Pattern | Source | Behavior |
+| --- | --- | --- |
+| Redirect metadata | `web/index.html:18` | Zero-delay refresh to the exact new site URL; no script required |
+| Main landmark and heading | `web/index.html:96` | Single semantic `main` and `h1`, centered and responsive |
+| Primary navigation link | `web/index.html:62`, `web/index.html:98` | Native anchor styled as a button; same-tab navigation, standard keyboard and modified-click support |
+| Focus, hover, press | `web/index.html:78` | Visible keyboard outline; lighter pointer-hover fill; underline while active; instant state changes |
+| Metadata assets | `web/public/`, editable card at `web/design/social-card.svg` | Local favicon and sharing image, referenced relative to the HTML |
 
-Transitions are limited to border color and scale at 120ms, and link color at 120ms, only under `prefers-reduced-motion: no-preference`. Press scale is .96. Button fills change immediately to avoid transient contrast failures when a disabled action becomes available. There is no page-load animation. Reduced-motion mode removes these transitions.
+There are no animations, loading/error states, forms, dialogs, application components, or runtime scripts. Tooling under `web/scripts/` and `web/tests/` is only for building/checking and is never copied to `dist/`.
 
 ## Do's and Don'ts
 
-- Start additional content with `.section` and `.section-heading`; reuse the existing grids and panel padding. Preserve one page `h1` and a descending heading hierarchy.
-- Use the gold filled action for the local primary flow; keep supporting links and secondary actions quieter. Repeat the exact consequence in sale confirmations.
-- Render unavailable blockchain facts as unavailable, never as fabricated zero values. Preserve the bigint transaction boundary.
-- Keep action labels explicit, warnings readable and static content's lack of secrecy visible. Do not imply a price forecast, guaranteed profit or funded reserve without a chain read.
-- Use native controls and existing focus, error and motion treatments. Do not reintroduce tiny labels inside a scaled SVG.
-- Keep runtime assets local and links relative where they are part of the export. Do not add remote fonts, trackers, fake content or another type/color system.
+Keep the destination identical in the refresh and native link. Reuse the existing tokens when adjusting the fallback. Preserve semantic HTML, wrapping, focus, and relative local assets. This assignment is a single-page redirect: additional pages or application flows would require a new request.
 
-Design guidance: Better Interface by Jakub Krehel, pinned commit `267330e1adfc66a718fb65fa6918c1f06d0a689e` (MIT). Documentation method: Impeccable by Paul Bakaus, commit `9d715cc4f5564a990ca8345abfdd5df6dc9b41c8` (Apache-2.0). Full notices and licenses are retained in `docs/DESIGN-LICENSE.txt`.
+Guidance adapted from Jakub Krehel's Better Interface at commit `267330e1adfc66a718fb65fa6918c1f06d0a689e` (MIT). Documentation method adapted from Paul Bakaus's Impeccable at commit `9d715cc4f5564a990ca8345abfdd5df6dc9b41c8` (Apache-2.0). Existing notices and licenses are retained in `docs/DESIGN-LICENSE.txt`.

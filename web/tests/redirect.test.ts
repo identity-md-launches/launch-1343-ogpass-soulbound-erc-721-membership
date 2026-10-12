@@ -31,7 +31,7 @@ for (const [label, directory] of [['source', root], ['production export', resolv
       expect(html).not.toMatch(/javascript:|@import|\bfetch\s*\(|\bethers\b|\bviem\b|\bwallet\b|\bclaim\b|\bsell\b|\bbuy\b|\b0x[0-9a-f]{40}\b/i);
     });
 
-    it('provides accessible document structure and local sharing assets', () => {
+    it('provides accessible document structure without separate metadata assets', () => {
       expect(document.documentElement.lang).toBe('en');
       expect(document.title).toBe('OG Club has moved');
       expect(document.querySelectorAll('h1')).toHaveLength(1);
@@ -40,23 +40,12 @@ for (const [label, directory] of [['source', root], ['production export', resolv
       expect(document.querySelector('meta[name="description"]')?.getAttribute('content')).toContain('OG Club has moved');
       expect(document.querySelector('meta[property="og:title"]')?.getAttribute('content')).toBe('OG Club has moved');
       expect(document.querySelector('meta[property="og:site_name"]')?.getAttribute('content')).toBe('OG Club');
-      const assetRoot = label === 'source' ? resolve(directory, 'public') : directory;
-      const icon = document.querySelector('link[rel="icon"]')?.getAttribute('href');
-      const image = document.querySelector('meta[property="og:image"]')?.getAttribute('content');
-      expect(icon).toBe('./favicon.svg');
-      expect(image).toBe('./social-card.png');
-      expect(readFileSync(resolve(assetRoot, icon!), 'utf8')).toContain('<svg');
-      const png = readFileSync(resolve(assetRoot, image!));
-      expect(png.subarray(0, 8).toString('hex')).toBe('89504e470d0a1a0a');
-      expect(png.readUInt32BE(16)).toBe(1200);
-      expect(png.readUInt32BE(20)).toBe(630);
+      expect(document.querySelectorAll('link, meta[property^="og:image"], [src], [srcset]')).toHaveLength(0);
+      expect(html).not.toMatch(/url\s*\(/i);
     });
   });
 }
 
-it('ships one HTML page and only its two metadata assets', () => {
-  expect(readdirSync(resolve(root, '../dist')).sort()).toEqual(['favicon.svg', 'index.html', 'social-card.png']);
-  for (const name of ['favicon.svg', 'social-card.png']) {
-    expect(readFileSync(resolve(root, '../dist', name))).toEqual(readFileSync(resolve(root, 'public', name)));
-  }
+it('ships only index.html', () => {
+  expect(readdirSync(resolve(root, '../dist'))).toEqual(['index.html']);
 });

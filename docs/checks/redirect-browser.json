@@ -6,7 +6,7 @@
       "destination": "https://og-club-members-only-priced-by-t.sites.imd.fun/",
       "requests": [
         {
-          "url": "http://127.0.0.1:35359/preview/",
+          "url": "http://127.0.0.1:36663/preview/",
           "type": "document",
           "method": "GET"
         },
@@ -22,7 +22,7 @@
       "destination": "https://og-club-members-only-priced-by-t.sites.imd.fun/",
       "requests": [
         {
-          "url": "http://127.0.0.1:35359/preview/",
+          "url": "http://127.0.0.1:36663/preview/",
           "type": "document",
           "method": "GET"
         },

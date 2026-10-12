@@ -11,15 +11,16 @@ const destination = 'https://og-club-members-only-priced-by-t.sites.imd.fun/';
 const refresh = `<meta http-equiv="refresh" content="0; url=${destination}">`;
 const html = fs.readFileSync(path.join(root, 'index.html'), 'utf8');
 assert.equal(html.split(refresh).length, 2);
+assert.deepEqual(fs.readdirSync(root), ['index.html']);
 fs.mkdirSync(path.join(docs, 'screenshots'), { recursive: true });
 fs.mkdirSync(path.join(docs, 'checks'), { recursive: true });
 const server = http.createServer((req, res) => {
   const url = new URL(req.url, 'http://localhost');
   const name = url.pathname.replace(/^\/preview\//, '') || 'index.html';
-  if (!url.pathname.startsWith('/preview/') || !['index.html', 'favicon.svg', 'social-card.png'].includes(name)) {
+  if (!url.pathname.startsWith('/preview/') || name !== 'index.html') {
     res.writeHead(404); return res.end();
   }
-  res.writeHead(200, { 'content-type': { '.html': 'text/html', '.svg': 'image/svg+xml', '.png': 'image/png' }[path.extname(name)] });
+  res.writeHead(200, { 'content-type': 'text/html' });
   res.end(fs.readFileSync(path.join(root, name)));
 });
 await new Promise(resolve => server.listen(0, '127.0.0.1', resolve));
@@ -144,11 +145,6 @@ try {
   await page.screenshot({ path: path.join(docs, 'screenshots/redirect-forced-colors.png') });
   await page.emulateMedia({ forcedColors: 'none', reducedMotion: 'no-preference' });
   results.accessibilityTree = await page.locator('body').ariaSnapshot();
-  for (const asset of ['favicon.svg', 'social-card.png']) {
-    const response = await context.request.get(base + asset);
-    assert.equal(response.status(), 200);
-    assert.ok((await response.body()).equals(fs.readFileSync(path.join(root, asset))));
-  }
   assert.ok(requests.every(r => r.method === 'GET' && !['script', 'fetch', 'xhr', 'websocket'].includes(r.type)));
   assert.deepEqual(consoleErrors, []); assert.deepEqual(failedRequests, []);
   results.consoleErrors = consoleErrors; results.failedRequests = failedRequests;

@@ -6,7 +6,7 @@ A single static redirect page for visitors arriving at the old OG Club URL. `web
 
 ## Colors
 
-All tokens are defined in `web/index.html:20` and use the existing sRGB hex notation.
+All tokens are defined in `web/index.html:15` and use the existing sRGB hex notation.
 
 | Token | Value | Implemented role |
 | --- | --- | --- |
@@ -35,22 +35,21 @@ A flat page with no panels, shadows, gradients, overlays, or decoration. The act
 
 ## Shapes
 
-The action has a `0.5rem` corner radius and a 1px border. Focus adds a 2px solid outline with 4px offset. The existing OG favicon is retained; the local 1200×630 sharing card uses the same page palette and updated migration copy.
+The action has a `0.5rem` corner radius and a 1px border. Focus adds a 2px solid outline with 4px offset. No favicon or sharing image is included: the published site is exactly one `index.html`, as explicitly requested.
 
 ## Components
 
 | Pattern | Source | Behavior |
 | --- | --- | --- |
-| Redirect metadata | `web/index.html:18` | Zero-delay refresh to the exact new site URL; no script required |
-| Main landmark and heading | `web/index.html:96` | Single semantic `main` and `h1`, centered and responsive |
-| Primary navigation link | `web/index.html:62`, `web/index.html:98` | Native anchor styled as a button; same-tab navigation, standard keyboard and modified-click support |
-| Focus, hover, press | `web/index.html:78` | Visible keyboard outline; lighter pointer-hover fill; underline while active; instant state changes |
-| Metadata assets | `web/public/`, editable card at `web/design/social-card.svg` | Local favicon and sharing image, referenced relative to the HTML |
+| Redirect metadata | `web/index.html:13` | Zero-delay refresh to the exact new site URL; no script required |
+| Main landmark and heading | `web/index.html:91` | Single semantic `main` and `h1`, centered and responsive |
+| Primary navigation link | `web/index.html:57`, `web/index.html:93` | Native anchor styled as a button; same-tab navigation, standard keyboard and modified-click support |
+| Focus, hover, press | `web/index.html:73` | Visible keyboard outline; lighter pointer-hover fill; underline while active; instant state changes |
 
 There are no animations, loading/error states, forms, dialogs, application components, or runtime scripts. Tooling under `web/scripts/` and `web/tests/` is only for building/checking and is never copied to `dist/`.
 
 ## Do's and Don'ts
 
-Keep the destination identical in the refresh and native link. Reuse the existing tokens when adjusting the fallback. Preserve semantic HTML, wrapping, focus, and relative local assets. This assignment is a single-page redirect: additional pages or application flows would require a new request.
+Keep the destination identical in the refresh and native link. Reuse the existing tokens when adjusting the fallback. Preserve semantic HTML, wrapping and focus. Keep all runtime markup and styling in `index.html`, with no separate assets. This assignment is a single-page redirect: additional pages or application flows would require a new request.
 
 Guidance adapted from Jakub Krehel's Better Interface at commit `267330e1adfc66a718fb65fa6918c1f06d0a689e` (MIT). Documentation method adapted from Paul Bakaus's Impeccable at commit `9d715cc4f5564a990ca8345abfdd5df6dc9b41c8` (Apache-2.0). Existing notices and licenses are retained in `docs/DESIGN-LICENSE.txt`.

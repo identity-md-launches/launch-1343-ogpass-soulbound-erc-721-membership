@@ -4,7 +4,7 @@
 
 OG Club is a membership interface for visitors and existing public/founder pass holders. Its dark charcoal surfaces and gold accent extend the OG Swarm map's visual direction. A short product introduction sits beside an actionable membership card on desktop and above it on mobile. Contract facts, risks and the primary action take precedence over decoration.
 
-The source of truth is `web/src/styles.css`, with page composition and components in `web/src/App.tsx`. The implementation is a single fragment-navigated page; there is no page transition, carousel, theme switch or custom icon font. The hero headline has five words. There are no tracked uppercase eyebrow headings.
+The source of truth is `web/src/styles.css`, with page composition and components in `web/src/App.tsx`. The implementation is a single fragment-navigated page; there is no page transition, carousel, theme switch or custom icon font. The five-word hero headline, “Buy your OG Club pass.”, names the product and paid action; one supporting sentence explains the membership. There are no tracked uppercase eyebrow headings.
 
 ## Colors
 
@@ -44,7 +44,7 @@ Six text-size tokens live at the top of `styles.css`:
 
 The main stack is `Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif`. No Inter file or remote font is requested: Inter is used only if installed, otherwise the platform supplies the system face. The italic word in the hero uses `Georgia, "Times New Roman", serif`. The decorative pass seal uses Georgia/serif. There are no bundled webfonts.
 
-Body line-height is 1.6; captions are 1.5; short headings are 1.15 (hero 1.08). Heading weights are 500/600; controls use 600; regular copy uses 400. The brand requests 650. Heading tracking ranges from −.02em to −.055em. Long copy remains regular-weight and readable. Headings balance; prose uses pretty wrapping. Prices, counters, timestamps and table values use tabular figures.
+Body line-height is 1.6; captions are 1.5; short headings are 1.15 (hero 1.08). The three weights are 400, 500 and 600. The hero, brand, controls and default `strong`/`b` emphasis use 600; secondary headings use 500/600; regular copy and the gold italic hero emphasis use 400. Explicit local emphasis overrides remain in place. Heading tracking ranges from −.02em to −.055em. Long copy remains regular-weight and readable. Headings balance; prose uses pretty wrapping. Prices, counters, timestamps and table values use tabular figures. `.metric dd small` resets OG unit tracking to `0`, so units do not inherit display-number tracking.
 
 Chart axis labels are HTML using the caption token, so their text does not shrink with the SVG. The diagram's accessible name includes its range, current supply and selected price. Wallet addresses are shortened in dense areas, with the complete connected address in its dialog and event addresses linked to their full explorer pages.
 
@@ -57,11 +57,11 @@ Spacing follows a four-pixel base with 8/12/16px within groups, 20/24/28/32px pa
 - At `50rem`: header section navigation is hidden (all sections remain in normal document flow); the chart/supply section becomes one column. Member and Telegram content can wrap.
 - At `38rem`: 16px gutters; hero, founder panel, reserve metrics and member tiles stack. Sections use 44px separation. The connected header gets a second row for OG balance and the membership badge. Its main connect/account button stays at the top.
 
-All content remains in document flow; no sticky toolbar obscures small screens. The activity table alone scrolls horizontally inside a named, keyboard-focusable region. The page itself has no horizontal overflow at tested widths of 320, 375, 390, 768 and 1440px, or with 200% text enlargement at 390px. The main connect-to-join button ends at about y=664px at 390×844 and y=728px at 375×812. These are measured initial visitor states, not a guarantee about every future translation or wallet label.
+All content remains in document flow; no sticky toolbar obscures small screens. The activity table alone scrolls horizontally inside a named, keyboard-focusable region. The page itself has no horizontal overflow at tested widths of 320, 375, 390, 768 and 1440px, or with 200% text enlargement at 390px. The main connect-to-join button ends at about y=704px at both 390×844 and 375×812. These are measured initial visitor states, not a guarantee about every future translation or wallet label.
 
 ## Elevation & Depth
 
-Ordinary panels are flat with a one-pixel structural border. The pass card uses `0 16px 48px #0004`; its seal has two subtle inset rings. The selected segment uses `0 1px 3px #0006`. Dialogs use `0 24px 80px #0009` with a `#000b` native backdrop. There is no blur, parallax, image background or autoplay.
+Ordinary panels are flat with a one-pixel structural border. The pass card uses its gold border and gradient without a drop shadow; its seal has two subtle inset rings. The selected segment uses `0 1px 3px #0006`. Dialogs use `0 24px 80px #0009` with a `#000b` native backdrop. There is no blur, parallax, image background or autoplay.
 
 ## Shapes
 
@@ -75,11 +75,11 @@ Buttons, small notices and the segmented control use 8px corners; the selected s
 | `Modal` in `App.tsx` | Native `dialog.showModal()` makes background content inert. Close button, Escape, explicit Tab boundary cycling and browser focus restoration keep the flow keyboard-usable. Long review content scrolls within a viewport-bounded dialog. |
 | `Curve({ prices, supply })` in `App.tsx` | Contract-read prices, SVG line/fill and a dashed current-supply marker. Native range input with a bound label supports pointer/keyboard exploration. HTML endpoints/current-supply text and a live selected-value output supplement the drawing. Empty reads have explanatory copy. |
 | `Metric({ label, value, note })` in `App.tsx` | Definition-list group using a `dt` followed by value/note `dd`s. Supports changing numeric values and truthful unavailable states. |
-| `.pass-card`, `.segment`, `.quote` | Fixed membership identity above the Buy/Sell controls. Quote and call-to-action remain central; optional ETH estimates appear only with a verified configured pool and a successful read. |
+| `.pass-card`, `.segment`, `.quote` | Fixed membership identity above the Buy/Sell controls. Quote and call-to-action remain central. Sell mode shows the fixed founder buyback and permanent loss warning for founders; public holders see the net public payout and burn caption. Optional ETH estimates use the displayed amount and appear only with a verified configured pool and a successful read. |
 | `.founder-section`, `.countdown` | Countdown, eligibility, root mismatch, reserve funding and founder exit consequences. Claim actions disappear for ineligible/claimed/member/expired states. The reserve status remains factual. |
 | `External` and `Arrow` in `App.tsx` | Consistent descriptive external links with an arrow and screen-reader new-tab note; decorative arrows are hidden from assistive technology. |
 | `.notice`, `.error`, `.transaction-status` | Persistent errors with recovery, a stable polite live region for progress, and transaction explorer links. Color always accompanies readable text. |
-| `.member-grid`, `.member-locked`, `.telegram-row` | Honest content placeholders, a locked visitor state, and a signature-based invite action. Missing backend becomes coming soon without a signature prompt. |
+| `.member-grid`, `.member-locked`, `.telegram-row` | Honest content placeholders, a locked visitor state, and a signature-based invite action. Missing backend becomes coming soon without a signature prompt. A successful invite survives same-account snapshot refreshes; account changes, disconnects and confirmed membership loss clear it. An in-flight response from a previous wallet session is discarded. |
 
 Transitions are limited to border color and scale at 120ms, and link color at 120ms, only under `prefers-reduced-motion: no-preference`. Press scale is .96. Button fills change immediately to avoid transient contrast failures when a disabled action becomes available. There is no page-load animation. Reduced-motion mode removes these transitions.
 

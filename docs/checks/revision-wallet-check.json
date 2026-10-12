@@ -1,0 +1,158 @@
+{
+  "checkedAt": "2026-10-12T08:01:08.246Z",
+  "mode": "Deterministic test doubles for RPC and EIP-6963 wallet. Wallet rejects every write. No live signatures or transactions.",
+  "results": [
+    {
+      "scenario": "guest",
+      "passed": true,
+      "rpcRequests": 188,
+      "walletMethods": [
+        "eth_requestAccounts",
+        "eth_chainId",
+        "eth_accounts",
+        "eth_chainId",
+        "eth_accounts",
+        "eth_chainId",
+        "eth_accounts",
+        "eth_chainId",
+        "eth_chainId",
+        "eth_sendTransaction",
+        "eth_accounts",
+        "eth_chainId",
+        "eth_accounts",
+        "eth_chainId",
+        "eth_accounts",
+        "eth_chainId",
+        "eth_chainId",
+        "eth_sendTransaction"
+      ],
+      "accessibilityViolations": 0
+    },
+    {
+      "scenario": "wrong",
+      "passed": true,
+      "rpcRequests": 162,
+      "walletMethods": [
+        "eth_requestAccounts",
+        "eth_chainId",
+        "wallet_switchEthereumChain",
+        "eth_chainId"
+      ],
+      "accessibilityViolations": 0
+    },
+    {
+      "scenario": "public",
+      "passed": true,
+      "rpcRequests": 192,
+      "walletMethods": [
+        "eth_requestAccounts",
+        "eth_chainId",
+        "eth_accounts",
+        "eth_chainId",
+        "eth_accounts",
+        "eth_chainId",
+        "eth_accounts",
+        "eth_chainId",
+        "eth_chainId",
+        "eth_sendTransaction",
+        "eth_accounts",
+        "eth_chainId"
+      ],
+      "accessibilityViolations": 0
+    },
+    {
+      "scenario": "founder",
+      "passed": true,
+      "rpcRequests": 177,
+      "walletMethods": [
+        "eth_requestAccounts",
+        "eth_chainId",
+        "eth_accounts",
+        "eth_chainId",
+        "eth_accounts",
+        "eth_chainId",
+        "eth_accounts",
+        "eth_chainId",
+        "eth_chainId",
+        "eth_sendTransaction"
+      ],
+      "accessibilityViolations": 0
+    },
+    {
+      "scenario": "unfunded",
+      "passed": true,
+      "rpcRequests": 151,
+      "walletMethods": [
+        "eth_requestAccounts",
+        "eth_chainId"
+      ],
+      "accessibilityViolations": 0
+    },
+    {
+      "scenario": "telegram",
+      "passed": true,
+      "rpcRequests": 220,
+      "walletMethods": [
+        "eth_requestAccounts",
+        "eth_chainId",
+        "eth_accounts",
+        "eth_chainId",
+        "eth_accounts",
+        "eth_chainId",
+        "personal_sign"
+      ],
+      "accessibilityViolations": 0
+    },
+    {
+      "scenario": "badroot",
+      "passed": true,
+      "rpcRequests": 143,
+      "walletMethods": [
+        "eth_requestAccounts",
+        "eth_chainId"
+      ],
+      "accessibilityViolations": 0
+    },
+    {
+      "scenario": "expired",
+      "passed": true,
+      "rpcRequests": 143,
+      "walletMethods": [
+        "eth_requestAccounts",
+        "eth_chainId"
+      ],
+      "accessibilityViolations": 0
+    },
+    {
+      "scenario": "claimed",
+      "passed": true,
+      "rpcRequests": 151,
+      "walletMethods": [
+        "eth_requestAccounts",
+        "eth_chainId"
+      ],
+      "accessibilityViolations": 0
+    },
+    {
+      "scenario": "paused",
+      "passed": true,
+      "rpcRequests": 143,
+      "walletMethods": [
+        "eth_requestAccounts",
+        "eth_chainId"
+      ],
+      "accessibilityViolations": 0
+    },
+    {
+      "scenario": "soldout",
+      "passed": true,
+      "rpcRequests": 743,
+      "walletMethods": [
+        "eth_requestAccounts",
+        "eth_chainId"
+      ],
+      "accessibilityViolations": 0
+    }
+  ],
+  "pageErrors": []
+}

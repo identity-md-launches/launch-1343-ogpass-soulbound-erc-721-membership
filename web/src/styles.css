@@ -44,6 +44,10 @@ button,
 input {
   font: inherit;
 }
+strong,
+b {
+  font-weight: 600;
+}
 button,
 a,
 input,
@@ -161,7 +165,7 @@ small,
   gap: 10px;
   align-items: center;
   text-decoration: none;
-  font-weight: 650;
+  font-weight: 600;
   font-size: var(--text-lg);
   line-height: 1.2;
 }
@@ -281,7 +285,7 @@ main {
 }
 .hero h1 {
   font-size: var(--text-hero);
-  font-weight: 500;
+  font-weight: 600;
   letter-spacing: -0.055em;
   max-width: 9em;
   line-height: 1.08;
@@ -321,7 +325,6 @@ main {
   background: linear-gradient(135deg, #222017 0%, var(--surface) 52%);
   border-radius: 20px;
   padding: 28px;
-  box-shadow: 0 16px 48px #0004;
   min-width: 0;
 }
 .pass-top {
@@ -588,6 +591,7 @@ dl {
 }
 .metric dd small {
   font-size: var(--text-base);
+  letter-spacing: 0;
 }
 .metric .caption {
   display: block;

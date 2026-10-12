@@ -1,5 +1,76 @@
 # OG Club validation and Better Interface review
 
+## Current revision · 2026-10-12
+
+**Complete for the stated revision scope.** All six findings were reproduced against the original accepted `dist/` before editing production source. Changes are limited to invite lifecycle, founder sale presentation, the reported typography/surface/copy issues, regression checks, documentation and the rebuilt static export. The contracts, deployment handoff, build configuration, dependency manifests/lockfile and ignore files are unchanged. Git submission is left to the network worker; this revision does not modify Git metadata.
+
+These are worker observations, not independent certification. The sections below “Initial implementation record” preserve historical results from the accepted implementation; they are not claims that every earlier check was rerun. This section and the revision JSON reports supersede earlier layout measurements. Screenshot links now show the revised export.
+
+### Reproduction and fixes
+
+[Before-fix evidence](checks/revision-before.json) records deterministic Chromium observations from the original export. Source references below identify the final corrected implementation.
+
+| Finding ID prefix | Source | Reproduced behavior and correction | Recheck |
+| --- | --- | --- | --- |
+| `d4f00e57` · High | `web/src/App.tsx:343`, `:364`, `:1058` | A successful invite appeared at 847.4 ms and disappeared at 888.2 ms; the ready notice persisted with no link. Snapshot refreshes no longer clear invite state. Wallet address changes/disconnect and confirmed membership loss do clear it. A response from an invalidated wallet session is discarded. | Component checks cover immediate/manual/30-second refresh, another member account, disconnect/reconnect, membership loss/reacquisition and a pending invite during account change. Chromium retains the link after each refresh and opens its exact URL in an intercepted local popup. |
+| `7579a819` · Medium | `web/src/App.tsx:403`, `:604`, `:690` | A founder's Sell card quoted 925,000 OG while confirmation offered 100,000 OG. The card now quotes `FOUNDER_BUYBACK`, labels it “Fixed founder buyback,” derives its optional ETH estimate from the same amount, and states the permanent membership/claim consequence. | Funded and unfunded founder component/browser checks show 100,000 OG; card/confirmation agree. Public sell remains 925,000 OG in the fixture, with the public fee caption; the curve retains its public quote. |
+| `29993d04` · Medium | `web/src/styles.css:47`, `:168`, `:286` | Computed weights were 400/500/600/650/700 at mobile and desktop. Brand, default strong/b and h1 now use 600; explicit overrides and italic gold treatment remain. | All five tested widths report only 400/500/600. Hero, brand and warning emphasis are 600. |
+| `24b4b12b` · Low | `web/src/styles.css:592` | Three 16px reserve units inherited -0.72px tracking at desktop. Reset unit letter spacing to 0. | All three units have natural spacing at five widths. The minified CSS/browser serializes zero as `normal`; numbers retain their display tracking. |
+| `f0b435a8` · Low | `web/src/styles.css:322` | Pass surface had a 1px border plus a 48px blurred shadow. Removed its shadow only. | Computed pass shadow is `none`, border remains 1px. Screenshots retain the gold/gradient/seal treatment. |
+| `85645e32` · Medium | `web/src/App.tsx:557` | The five-word headline omitted the product and purchase action; supporting copy used two sentences. Now “Buy your OG Club pass.” with one explanatory sentence. | Exact copy assertions and rendered mobile/desktop review pass. The primary action is above the fold at 390×844 and 375×812. |
+
+Every full finding ID and verdict is recorded in repository-root `.imd-responses.json` for the worker response protocol.
+
+### Commands and evidence
+
+To honor the restriction on repository dependency directories, copied `web/` and `dist/` into `/tmp/ogclub-revision-bvj0jlw_` and ran the unchanged lockfile/configuration there. Source and public files were checked against the repository; only the generated `dist/` was copied back. No temporary packages, caches or scratch reproduction code are submitted. The permanent regression checks are `web/tests/app.test.tsx` and the expanded browser scripts.
+
+Commands below ran in that temporary copy's `web/`:
+
+| Command | Observed result |
+| --- | --- |
+| `npm ci --cache /tmp/ogclub-revision-npm-cache --no-audit --no-fund` | Exit 0, 155 packages installed from the unchanged lockfile. |
+| `npm run typecheck` | Exit 0. A test-only unsupported `exact` option was corrected before this passing run. |
+| `npm test` | Exit 0, **47 tests in 5 files**, including 8 new component regression cases. |
+| `npm run build` | Exit 0, regenerated the root export. Existing >500 kB main-chunk warning remains (676.60 kB, 205.82 kB gzip). |
+| `OGCLUB_RPC=http://127.0.0.1:35547/rpc/1 node scripts/browser-check.mjs` | Exit 0: real production export under `/preview/`, five viewports, first-screen action, type/spacing/surface assertions, keyboard/dialog/range checks, reduced motion, 200% text enlargement and social-image dimensions. Live reads used the supplied relay. Zero page exceptions, failed requests or axe violations. |
+| `node scripts/wallet-check.mjs` | Exit 0: **11 deterministic wallet scenarios**, including successful SIWE invite POST/link retention/opening and founder sell-card quotes. Zero page exceptions and zero axe violations in checked states. |
+
+The browser connector again returned `Transport closed`; all rendered checks used installed Playwright/Chromium with a foreground server/browser lifecycle. Wallet/RPC/Telegram tests use local doubles; the synthetic signature is not produced by a real wallet and the invitation popup is intercepted without visiting Telegram. The existing browser scenarios reject all transaction requests. No live signature, transaction, deployment or publication occurred.
+
+Reports: [revision browser checks](checks/revision-browser-check.json), [revision wallet checks](checks/revision-wallet-check.json), [baseline reproduction](checks/revision-before.json). [Packaging checks](checks/revision-delivery.json) pass: approximately 3.53 MB of candidate source/export files and 1.20 MB as a gzip tar, below 8 MiB; `dist/` is 789,903 bytes. The six responses are consumed separately by the worker, as intended. The final export and current source are checked together, including relative entry assets, required metadata, unchanged handoff bytes and dependency/build paths, and the 8 MiB submission limit.
+
+### Rendered results
+
+| Viewport | Document width | Main action bottom | Axe violations |
+| --- | --- | --- | --- |
+| 390 × 844 | 390px | 703.7px | 0 |
+| 375 × 812 | 375px | 703.7px | 0 |
+| 320 × 812 | 320px | 774.0px | 0 |
+| 768 × 1024 | 768px | 565.2px | 0 |
+| 1440 × 1000 | 1440px | 565.5px | 0 |
+
+At 390px with the root text size increased to 32px, the document remained 390px wide. This is text enlargement, not native browser zoom. Computed solid-pair contrast remains 9.34:1 for secondary text on page, 11.91:1 for primary-button ink on gold, and 16.02:1 for primary panel text. No new colors were added.
+
+Opened and visually inspected the final [mobile page](screenshots/mobile.jpg), [desktop page](screenshots/desktop.jpg), [keyboard focus](screenshots/keyboard-focus.jpg), [founder Sell card](screenshots/founder-sell.jpg) and [retained Telegram link](screenshots/telegram-invite.jpg). The founder and invite screenshots use deterministic test data.
+
+### Better Interface coverage for this revision
+
+Read the pinned workflow and all six domains' core principles before implementing; applied the documentation section to update `DESIGN.md` from the final source. Scope is the changed surfaces and their affected shared styles, without redesigning unrelated components.
+
+| Domain | Coverage | Limits |
+| --- | --- | --- |
+| Accessibility | **Checked:** native actionable invite link, buy/sell button states, labels, keyboard Tab/Enter/Escape and modal focus return, visible focused screenshot, range keyboard controls, reduced motion and automated axe scans. | No screen-reader session, physical-device or full conformance assessment. |
+| Layout | **Checked:** five widths, member header, invite wrapping, founder card, first-screen action and enlarged text; no page overflow. | No native browser zoom, RTL or translation test; English/LTR only. |
+| Writing | **Checked:** product-specific paid-action headline with one supporting sentence; founder quote/warning consistent with action and confirmation; ready invite notice now has a usable link; supplied disclaimer unchanged. | No independent legal review of supplied wording. |
+| Typography | **Checked:** three rendered weights, original six sizes, hero/brand emphasis, local overrides, natural reserve-unit spacing and screenshot wrapping. | Other operating-system font substitution and physical mobile rendering untested. |
+| Colors | **Checked:** existing semantic tokens preserved, solid computed contrast pairs remeasured, axe and focused screenshot inspected. | No exhaustive gradient-pixel/forced-colors testing. Additional themes are not applicable. |
+| UI | **Checked:** border-only pass boundary, funded/unfunded founder actions, public/buy quote preservation, invite success/refresh/identity-loss behavior and existing empty/error/disconnected states. | No real extension wallet, live Telegram backend or animation-panel slow-motion replay. |
+
+**Remaining limits:** WebKit was not rerun here. No live Telegram invite, real wallet signature, transaction, screen reader, native browser zoom or physical phone was tested. Optional ETH estimates remain hidden in production until a verified pool is supplied; founder ETH conversion was checked with a deterministic component fixture. No new required-flow defect remains from the scoped checks. Previous Foundry/static-analysis, ABI derivation, npm audit and comprehensive live-reader commands were not rerun because this revision changes no contracts, dependencies or data readers.
+
+## Initial implementation record (historical)
+
 Worker validation on 2026-10-12. **Implementation and validation are complete; the Git submission step remains pending because Git metadata is read-only**, with the specific limits below. These results are the worker's observations, not independent certification, a contract audit or proof that a future RPC/backend will remain available.
 
 ## Scope and assumptions

@@ -1,0 +1,24 @@
+{
+  "checkedAt": "2026-10-12",
+  "candidateFilesExcludingThisReport": 257,
+  "candidateFileBytesExcludingThisReport": 3525605,
+  "candidateGzipTarBytesExcludingThisReport": 1194740,
+  "byteBudget": 8388608,
+  "distBytes": 789903,
+  "sourceAndExportMatchIsolatedBuild": true,
+  "publicRuntimeAssetsMatch": true,
+  "relativeEntryAssets": [
+    "./favicon.svg",
+    "./assets/index-7bKP8zsw.js",
+    "./assets/index-6XeP33J0.css"
+  ],
+  "requiredMetadataPresent": true,
+  "protectedPathsUnchanged": true,
+  "dependencyDirectoriesAndArchivesAbsent": true,
+  "submodulesAbsent": true,
+  "sixFindingResponsesPresent": true,
+  "responsesConsumedSeparatelyByWorker": true,
+  "gitMetadataModified": false,
+  "commitPerformed": false,
+  "submission": "Network worker stages and commits the working tree."
+}

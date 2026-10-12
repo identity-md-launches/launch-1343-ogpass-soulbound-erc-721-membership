@@ -343,13 +343,15 @@ export default function App() {
   useEffect(() => {
     setMember(undefined);
     setMemberError("");
-    setInvite("");
     let active = true;
     if (club && wallet.address && s)
       club
         .member(wallet.address, s.block)
         .then((m) => {
-          if (active) setMember(m);
+          if (active) {
+            setMember(m);
+            if (!m.member) setInvite("");
+          }
         })
         .catch((e) => {
           if (active) setMemberError(errorText(e));
@@ -358,6 +360,9 @@ export default function App() {
       active = false;
     };
   }, [club, wallet.address, s]);
+  useEffect(() => {
+    setInvite("");
+  }, [wallet.address]);
   useEffect(() => {
     setModal(null);
     setAccepted(false);
@@ -395,6 +400,13 @@ export default function App() {
     claimOpen &&
     !busy;
   const funded = !!s && s.founderReserve >= s.FOUNDER_BUYBACK;
+  const founderSale = mode === "sell" && !!connectedMember?.founder;
+  const actionQuote =
+    mode === "buy"
+      ? s?.currentBuyPrice
+      : founderSale
+        ? s?.FOUNDER_BUYBACK
+        : s?.currentSellPrice;
   const eth = (amount?: bigint) =>
     spot && amount !== undefined
       ? `≈ ${(Number(formatUnits(amount, 18)) * spot).toLocaleString("en-US", { maximumSignificantDigits: 5 })} ETH · spot estimate`
@@ -542,11 +554,11 @@ export default function App() {
         <section className="hero" aria-labelledby="hero-title">
           <div className="hero-copy">
             <h1 id="hero-title">
-              A pass to the <em>community.</em>
+              Buy your <em>OG Club</em> pass.
             </h1>
             <p className="hero-description">
-              Content, tools and a shared point of view. Your non-transferable
-              membership in OG Club.
+              A non-transferable Ethereum membership for community, content and
+              tools.
             </p>
             <div className="hero-links">
               <a href="#members">
@@ -593,20 +605,15 @@ export default function App() {
               <span className="caption">
                 {mode === "buy"
                   ? "Current buy price"
-                  : "Current public sell payout"}
+                  : founderSale
+                    ? "Fixed founder buyback"
+                    : "Current public sell payout"}
               </span>
               <div className="quote-value">
-                {og(mode === "buy" ? s?.currentBuyPrice : s?.currentSellPrice)}{" "}
-                <span>OG</span>
+                {og(actionQuote)} <span>OG</span>
               </div>
-              {eth(
-                mode === "buy" ? s?.currentBuyPrice : s?.currentSellPrice,
-              ) && (
-                <p className="caption">
-                  {eth(
-                    mode === "buy" ? s?.currentBuyPrice : s?.currentSellPrice,
-                  )}
-                </p>
+              {eth(actionQuote) && (
+                <p className="caption">{eth(actionQuote)}</p>
               )}
             </div>
             {mode === "buy" ? (
@@ -680,8 +687,9 @@ export default function App() {
                   </p>
                 )}
                 <p className="caption">
-                  Public sale: you receive 92.5%; 7.5% is burned. Selling ends
-                  your membership.
+                  {founderSale
+                    ? "You lose membership and can never claim again."
+                    : "Public sale: you receive 92.5%; 7.5% is burned. Selling ends your membership."}
                 </p>
               </>
             )}
@@ -1047,6 +1055,10 @@ export default function App() {
                               return wc.signMessage({ message });
                             },
                           );
+                          if (wallet.sessionVersion() !== version)
+                            throw new Error(
+                              "The wallet session changed. Reconnect before requesting an invite.",
+                            );
                           setInvite(url);
                           report("Your single-use Telegram invite is ready.");
                         } catch (e) {

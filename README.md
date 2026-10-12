@@ -1,6 +1,6 @@
 # OG Club · ogclub.online
 
-A static Vite, React and TypeScript site using viem for the deployed Ethereum OGPass. The production website is in **`dist/`**; frontend source, a package manifest and the exact npm lockfile are in **`web/`**. The existing contracts and Foundry configuration are unchanged. Nothing was deployed or published by this task. Git metadata is mounted read-only in this seat, so the completed files are ready for the network submission step; this agent could not stage or commit them.
+A static Vite, React and TypeScript site using viem for the deployed Ethereum OGPass. The production website is in **`dist/`**; frontend source, a package manifest and the exact npm lockfile are in **`web/`**. The existing contracts and Foundry configuration are unchanged. Nothing was deployed or published by this task. The network submission step stages and commits the deliverable; this revision does not modify Git metadata.
 
 ## Install, preview, rebuild and publish
 
@@ -49,7 +49,7 @@ Contract reads use the requested public RPCs in order: Tenderly mainnet gateway,
 - **Cap:** `publicSupply + founderOutstanding + reservedFounderSlots() >= MAX_SUPPLY` is sold out. Reserved founder slots are included before the deadline.
 - **Public sell:** `currentSellPrice()` is already the **net 92.5% payout**. The interface shows that amount and the separate 7.5% burn; it calls `sell(tokenId, payout, now + 600 seconds)` after confirmation. It never deducts the fee twice.
 - **Founder claim:** all 49 supplied address bytes are preserved in `web/src/founders.ts`; case is normalized for matching. `StandardMerkleTree.of(addresses.map(a => [a]), ['address'])` reproduces the on-chain root. A mismatch hides Claim and displays an error. Claimed wallets, existing members, non-founders and expired claims cannot claim through the interface.
-- **Founder sale:** `sellFounder(tokenId)` pays the fixed 100,000 OG from the separately funded reserve. Its button stays disabled below the required reserve. The reserve is always read on chain; it is never assumed funded. Confirmation explicitly states **“you lose membership and can never claim again.”**
+- **Founder sale:** `sellFounder(tokenId)` pays the fixed 100,000 OG from the separately funded reserve. Its button stays disabled below the required reserve. The reserve is always read on chain; it is never assumed funded. Both the sell card and confirmation show this fixed payout and explicitly state **“you lose membership and can never claim again.”** The public curve section retains the public sell quote.
 - **Member area:** Alpha, Launch digests and Tools are honest placeholders. The Swarm map is linked and Auction tools has a clearly marked placeholder. **Static content is not secret.** Client-side membership checks control presentation; anyone can fetch site files. Do not put confidential content in the export.
 
 All amounts submitted to contracts remain bigint values. Number conversion is limited to chart coordinates and display formatting. Wallet transactions are simulated before submission and their receipts checked; no private keys are used. One confirmation is displayed as confirmed, not finalized.
@@ -72,9 +72,13 @@ The frontend performs this handshake on the visitor's explicit action:
 4. After signature verification, read `isMember(address)` on Ethereum from the deployed OGPass. Reject non-members even if an earlier request or the page claimed membership. Do not trust a client token ID or badge.
 5. A backend-only Telegram bot, with invite permissions, calls [`createChatInviteLink`](https://core.telegram.org/bots/api#createchatinvitelink) with `member_limit=1` and a short `expire_date`. Return JSON `{ "inviteUrl": "https://t.me/+actualInviteCode" }`. Issue one invite per successful challenge and rate-limit retries. The browser accepts only HTTPS `t.me/+...` or `t.me/joinchat/...` invitation URLs and presents a user-operated link.
 
+The returned invite remains usable across immediate, manual and 30-second same-account refreshes. Changing or disconnecting the wallet, or a confirmed loss of membership, clears it. A late response from an earlier wallet session is discarded. The invite is held only in page memory.
+
 Keep the bot token and chat ID only on the backend. For cross-origin hosting, configure an explicit allowed origin and credentialed CORS/session behavior; do not use `*` with credentials. Do not treat the user's signature as approval to transact. Missing endpoints (404/405/501/503 or a static HTML fallback) display **coming soon** and never request a signature. Other errors offer retry. No Telegram backend or bot credentials were supplied or implemented in this static-site assignment.
 
 ## Checks and limitations
+
+The revision reproduced and fixed all six reported findings. `npm run typecheck`, `npm test` (**47 tests**) and `npm run build` passed. The production export passed five viewport checks and **11 wallet scenarios**, including successful Telegram link retention/opening and funded/unfunded founder quotes. Zero axe violations were reported in the checked states. See the current revision section in `docs/VALIDATION.md` for the exact commands, evidence and limits.
 
 Actual commands, six-domain design review, findings, viewport measurements and evidence are recorded in [docs/VALIDATION.md](docs/VALIDATION.md). [DESIGN.md](DESIGN.md) documents the final tokens and components. The original contract documentation is preserved in [docs/CONTRACT.md](docs/CONTRACT.md).
 
@@ -82,13 +86,13 @@ Additional checks (from `web/`):
 
 ```sh
 npm run verify:handoff
-node scripts/browser-check.mjs
+OGCLUB_RPC=http://127.0.0.1:35547/rpc/1 node scripts/browser-check.mjs
 node scripts/wallet-check.mjs
 node scripts/live-check.mjs
 npm audit --omit=dev
 ```
 
-The browser scripts use the contributor machine's installed headless Chromium; set `OGCLUB_CHROMIUM` or adapt the executable path on another machine. They manage their preview and browser inside one bounded command and close both. `browser-check.mjs` serves the real `dist/` at `/preview/` and relays reads to the worker's loopback RPC; `wallet-check.mjs` uses entirely synthetic test RPC and wallet responses, rejecting writes. `live-check.mjs` uses the read-only relay `http://127.0.0.1:42601/rpc/1`, which is local to this worker. This relay is absent from the production export. These scripts do not broadcast transactions.
+The browser scripts use the contributor machine's installed headless Chromium; set `OGCLUB_CHROMIUM` or adapt the executable path on another machine. They manage their preview and browser inside one bounded command and close both. `browser-check.mjs` serves the real `dist/` at `/preview/` and relays reads to `OGCLUB_RPC` (use the endpoint supplied for your run); `wallet-check.mjs` uses entirely synthetic test RPC and wallet responses, rejecting writes. `live-check.mjs` uses the read-only relay `http://127.0.0.1:42601/rpc/1`, which is local to this worker. This relay is absent from the production export. These scripts do not broadcast transactions. The browser wallet suite returns a synthetic signature only for its successful Telegram scenario; its invite destination is intercepted locally.
 
 The built-in browser connector returned `Transport closed`, so rendered validation used the installed Playwright/Chromium directly. No physical phone, real extension wallet, hardware wallet, live signed transaction, deployed Telegram bot, native browser zoom or screen-reader session was tested. Public production endpoint availability can change; local live checks used the mandated relay. These limitations do not imply those checks passed. The production build warns that its main JavaScript chunk exceeds 500 kB before compression (about 206 kB gzip); the complete export remains small enough for the submission budget.
 

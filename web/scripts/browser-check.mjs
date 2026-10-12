@@ -62,7 +62,7 @@ try {
     /https:\/\/(mainnet.gateway.tenderly.co|rpc.mevblocker.io|eth.drpc.org)\/?/,
     async (route) => {
       try {
-        const response = await fetch("http://127.0.0.1:42601/rpc/1", {
+        const response = await fetch(process.env.OGCLUB_RPC || "http://127.0.0.1:42601/rpc/1", {
           method: "POST",
           headers: { "content-type": "application/json" },
           body: route.request().postData(),
@@ -103,7 +103,30 @@ try {
         .querySelector(".pass-card .primary")
         ?.getBoundingClientRect()
         .toJSON(),
+      design: {
+        headline: document.querySelector("h1").textContent,
+        description: document.querySelector(".hero-description").textContent,
+        heroWeight: getComputedStyle(document.querySelector("h1")).fontWeight,
+        brandWeight: getComputedStyle(document.querySelector(".brand")).fontWeight,
+        warningWeight: getComputedStyle(document.querySelector(".risk-note strong")).fontWeight,
+        passShadow: getComputedStyle(document.querySelector(".pass-card")).boxShadow,
+        passBorder: getComputedStyle(document.querySelector(".pass-card")).borderTopWidth,
+        unitTracking: [...document.querySelectorAll(".reserve-grid .metric dd small")].map((el) => getComputedStyle(el).letterSpacing),
+        weights: [...new Set([...document.querySelectorAll("body *")]
+          .filter((el) => el.getClientRects().length && [...el.childNodes].some((n) => n.nodeType === 3 && n.textContent.trim()))
+          .map((el) => getComputedStyle(el).fontWeight))].sort(),
+      },
     }));
+    assert.equal(layout.design.headline, "Buy your OG Club pass.");
+    assert.equal(layout.design.description, "A non-transferable Ethereum membership for community, content and tools.");
+    assert.deepEqual(layout.design.weights, ["400", "500", "600"]);
+    assert.equal(layout.design.heroWeight, "600");
+    assert.equal(layout.design.brandWeight, "600");
+    assert.equal(layout.design.warningWeight, "600");
+    assert.equal(layout.design.passShadow, "none");
+    assert.equal(layout.design.passBorder, "1px");
+    assert.equal(layout.design.unitTracking.length, 3);
+    assert.ok(layout.design.unitTracking.every((value) => value === "0px" || value === "normal"));
     assert.ok(
       layout.scrollWidth <= width,
       `Overflow at ${width}: ${layout.scrollWidth}`,

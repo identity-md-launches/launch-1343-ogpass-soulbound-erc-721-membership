@@ -72,10 +72,11 @@ async function scenario(kind, check) {
     viewport: { width: 390, height: 844 },
   });
   const page = await context.newPage();
+  if (kind === "telegram") await page.clock.install();
   page.on("pageerror", (e) => pageErrors.push(e.message));
   const block = 26174760n,
     stamp = BigInt(Math.floor(Date.now() / 1000));
-  const member = ["public", "founder", "unfunded", "claimed"].includes(kind),
+  const member = ["public", "founder", "unfunded", "claimed", "telegram"].includes(kind),
     founder = ["founder", "unfunded", "claimed"].includes(kind);
   const state = {
     currentBuyPrice: 1010000n * 10n ** 18n,
@@ -222,7 +223,7 @@ async function scenario(kind, check) {
     },
   );
   await page.addInitScript(
-    ({ address, wrong }) => {
+    ({ address, wrong, telegram }) => {
       const events = new Map();
       let account = address,
         chain = wrong ? "0xa" : "0x1";
@@ -238,6 +239,8 @@ async function scenario(kind, check) {
             events.get("chainChanged")?.forEach((fn) => fn(chain));
             return null;
           }
+          if (method === "personal_sign" && telegram)
+            return `0x${"11".repeat(65)}`;
           if (method === "eth_sendTransaction" || method === "personal_sign")
             throw { code: 4001, message: "User rejected the request." };
           throw new Error(`Unhandled wallet ${method}`);
@@ -267,7 +270,7 @@ async function scenario(kind, check) {
         events.get("accountsChanged")?.forEach((fn) => fn([]));
       };
     },
-    { address, wrong: kind === "wrong" },
+    { address, wrong: kind === "wrong", telegram: kind === "telegram" },
   );
   try {
     await page.goto(`http://127.0.0.1:${server.address().port}/preview/`);
@@ -279,7 +282,7 @@ async function scenario(kind, check) {
       () => document.documentElement.scrollWidth,
     );
     assert.ok(connectedWidth <= 390, "Connected header fits mobile");
-    await check(page, state);
+    await check(page, state, requests);
     const axe = await new AxeBuilder({ page })
       .withTags(["wcag2a", "wcag2aa", "wcag21aa"])
       .analyze();
@@ -418,9 +421,19 @@ try {
     assert.ok(
       await page.locator(".wallet-balance").getByText("FOUNDER").isVisible(),
     );
-    await page
+    await page.getByRole("button", { name: "Sell a pass", exact: true }).click();
+    const card = page.locator(".pass-card");
+    assert.equal(await card.locator(".quote-value").innerText(), "100,000 OG");
+    assert.ok(await card.getByText("Fixed founder buyback", { exact: true }).isVisible());
+    assert.ok(await card.getByText("You lose membership and can never claim again.", { exact: true }).isVisible());
+    assert.equal(await card.getByText("Public sale:", { exact: false }).count(), 0);
+    assert.ok(await page.locator("#curve").getByText("925,000 OG", { exact: true }).isVisible());
+    fs.mkdirSync("../docs/screenshots", { recursive: true });
+    await card.screenshot({ path: "../docs/screenshots/founder-sell.jpg", type: "jpeg", quality: 80 });
+    await card
       .getByRole("button", { name: "Review founder buyback", exact: true })
       .click();
+    assert.ok(await page.getByRole("dialog").getByText("100,000 OG", { exact: true }).isVisible());
     assert.ok(
       await page
         .getByRole("dialog")
@@ -446,14 +459,61 @@ try {
     assert.deepEqual(data.args, [7n]);
   });
   await scenario("unfunded", async (page) => {
+    await page.getByRole("button", { name: "Sell a pass", exact: true }).click();
+    assert.equal(await page.locator(".pass-card .quote-value").innerText(), "100,000 OG");
     assert.ok(
-      await page
+      await page.locator(".pass-card")
         .getByRole("button", {
           name: "Buyback reserve not funded yet",
           exact: true,
         })
         .isDisabled(),
     );
+  });
+  await scenario("telegram", async (page, _state, rpcRequests) => {
+    const inviteUrl = "https://t.me/+reviewSuccess123";
+    const requests = [];
+    await page.route("**/api/tg-invite**", (route) => {
+      const request = route.request();
+      requests.push({ method: request.method(), body: request.method() === "POST" ? request.postDataJSON() : null });
+      return route.fulfill({ json: request.method() === "GET"
+        ? { nonce: "0123456789abcdef0123456789abcdef" }
+        : { inviteUrl } });
+    });
+    await page.getByRole("button", { name: "Join the members’ Telegram" }).click();
+    await page.getByText("Your single-use Telegram invite is ready.", { exact: true }).waitFor();
+    // Let run()'s immediate snapshot and membership refresh complete.
+    await page.waitForTimeout(1000);
+    const invite = page.getByRole("link", { name: "Open your single-use Telegram invite" });
+    assert.ok(await invite.isVisible(), "Invite survives the action refresh");
+    assert.equal(await invite.getAttribute("href"), inviteUrl);
+    const snapshots = () => rpcRequests.filter((q) => q.method === "eth_getBlockByNumber").length;
+    const beforeManual = snapshots();
+    await page.getByRole("button", { name: "Refresh data", exact: true }).click();
+    await page.waitForTimeout(1000);
+    assert.ok(snapshots() > beforeManual, "Manual refresh read a new snapshot");
+    assert.ok(await invite.isVisible(), "Invite survives a manual refresh");
+    const beforePeriodic = snapshots();
+    await page.clock.fastForward(30000);
+    await page.waitForTimeout(1000);
+    assert.ok(snapshots() > beforePeriodic, "The 30-second timer read a new snapshot");
+    assert.ok(await invite.isVisible(), "Invite survives the periodic refresh");
+    fs.mkdirSync("../docs/screenshots", { recursive: true });
+    await page.locator(".telegram-row").screenshot({ path: "../docs/screenshots/telegram-invite.jpg", type: "jpeg", quality: 80 });
+    assert.deepEqual(requests.map((q) => q.method), ["GET", "POST"]);
+    assert.match(requests[1].body.message, /^ogclub.online wants you to sign in/);
+    assert.equal(requests[1].body.signature, `0x${"11".repeat(65)}`);
+    // Exercise the usable link without visiting Telegram or using a real invite.
+    await page.context().route("https://t.me/**", (route) => route.fulfill({ contentType: "text/html", body: "Local invitation test" }));
+    const popupPromise = page.waitForEvent("popup");
+    await invite.click();
+    const popup = await popupPromise;
+    await popup.waitForLoadState();
+    assert.equal(popup.url(), inviteUrl);
+    await popup.close();
+    await page.evaluate(() => window.__changeAccount());
+    await page.getByRole("heading", { name: "A pass opens the door." }).waitFor();
+    assert.equal(await invite.count(), 0, "Disconnect clears the invite");
   });
   await scenario("badroot", async (page) => {
     assert.ok(

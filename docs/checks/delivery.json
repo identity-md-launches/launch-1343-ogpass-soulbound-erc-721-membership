@@ -1,0 +1,21 @@
+{
+  "candidateFileCount": 250,
+  "candidateFileBytesBeforeThisReport": 3448390,
+  "compressedTarBytesBeforeThisReport": 1156892,
+  "budgetBytes": 8388608,
+  "exportBytes": 789700,
+  "protectedExistingPathsUnchanged": true,
+  "noSubmodules": true,
+  "noDependenciesOrCachesInCandidates": true,
+  "gitLimitation": "git add failed because .git/index.lock cannot be created on the read-only Git metadata mount. No staging or commit was possible; repository files are ready for the network submission step.",
+  "distFiles": {
+    "dist/assets/ccip-DUW7jJar.js": "27f2d2e5e95a5aa416f39c74055abc62ae687e69096a1c6bb1167980f95306fa",
+    "dist/assets/index-ByOazvK_.css": "dc0a0990b78aef06e40d95f76370285c1ccca33afd3e4af7403987ac99db1be8",
+    "dist/assets/index-DCpxfS_I.js": "6b1fa7a5c23dc16ff6497e3ad4168d61377850b639b67eb76824ebea8721598c",
+    "dist/favicon.svg": "d09a9a37a114ca1ca3951355bd79e2a02325ef04aef5c8f5bf4484ca8ca13b8f",
+    "dist/imd-deployment.json": "c6053270b105827e43677161db49fa8d24e263eee7611e35a1c2de5e2a7a6951",
+    "dist/index.html": "8b3612526ae5ba48ab92b6b33685d42ea80c2c682fbf7359d6fbd57c6802c6d4",
+    "dist/site-config.json": "bd12eee5bfb919f5eed3d1279c34651162a77b45dc464e3cf11a7c299067c53b",
+    "dist/social-card.png": "82cb421035e1087fdfcf06241b7adc6260ebe81ecb9fc98267321ac1dd5e8504"
+  }
+}

@@ -1,0 +1,66 @@
+{
+  "member": {
+    "address": "0x5b95A971B4583A5f011E9DA082acdD679b870D06",
+    "member": true,
+    "claimed": false,
+    "balance": "50292979109600950169368101",
+    "tokenId": "1",
+    "founder": false
+  },
+  "checkedAt": "2026-10-12T07:14:32.987Z",
+  "chainId": 1,
+  "verification": true,
+  "computedFounderRoot": "0xb9c8ed1655d96a99d756f50819afd0c008b1097497edba9ee4fdb1b7ce2dc6c8",
+  "rootMatches": true,
+  "snapshot": {
+    "currentBuyPrice": "1010000000000000000000000",
+    "currentSellPrice": "925000000000000000000000",
+    "publicSupply": "1",
+    "founderClaimed": "0",
+    "founderOutstanding": "0",
+    "reservedFounderSlots": "49",
+    "curveReserve": "1000000000000000000000000",
+    "founderReserve": "4900000000000000000000000",
+    "MAX_SUPPLY": "1000",
+    "FOUNDER_BUYBACK": "100000000000000000000000",
+    "founderCount": "49",
+    "founderRoot": "0xb9c8ed1655d96a99d756f50819afd0c008b1097497edba9ee4fdb1b7ce2dc6c8",
+    "claimDeadline": "1794344615",
+    "buysPaused": false,
+    "block": "26174825",
+    "timestamp": "1791789263",
+    "loadedAt": 1791789272707
+  },
+  "chartPoints": 101,
+  "firstPrice": "1000000000000000000000000",
+  "lastPrice": "2000000000000000000000000",
+  "history": {
+    "burned": "0",
+    "throughBlock": "26174825",
+    "events": [
+      {
+        "eventName": "Buy",
+        "args": {
+          "buyer": "0x5b95A971B4583A5f011E9DA082acdD679b870D06",
+          "tokenId": "1",
+          "price": "1000000000000000000000000",
+          "publicSupplyAfter": "1"
+        },
+        "address": "0xca9dc9064ffc695d979ea7da9a35130376bb3217",
+        "topics": [
+          "0xbeae048c6d270d9469f86cf6e8fedda3c60ad770f16c24c9fc131c8e9a09101d",
+          "0x0000000000000000000000005b95a971b4583a5f011e9da082acdd679b870d06",
+          "0x0000000000000000000000000000000000000000000000000000000000000001"
+        ],
+        "data": "0x00000000000000000000000000000000000000000000d3c21bcecceda10000000000000000000000000000000000000000000000000000000000000000000001",
+        "blockHash": "0x57b07417c1ca7ed23ae1e090cb438da16eb43c2937bf00f4a2435687607c3f6a",
+        "blockNumber": "26174663",
+        "blockTimestamp": "1791787319",
+        "transactionHash": "0x2a7b769c2fbcc8e787c5118c85e9f1bcde447f5990ee8bd6873eaa0a11a7b865",
+        "transactionIndex": 82,
+        "logIndex": 240,
+        "removed": false
+      }
+    ]
+  }
+}
